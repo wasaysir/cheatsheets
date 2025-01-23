@@ -16,8 +16,6 @@
 )
 
 #include "units/00-general-formula.typ"
-#include "units/01-lorem-ipsum.typ"
-#include "units/02-lorem-ipsum.typ"
-#include "units/03-lorem-ipsum.typ"
-#include "units/04-lorem-ipsum.typ"
-#include "units/05-lorem-ipsum.typ"
+#include "units/01-neurons.typ"
+#include "units/02-synapses.typ"
+#include "units/03-neural-learning.typ"
