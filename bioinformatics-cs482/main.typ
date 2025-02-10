@@ -3,8 +3,8 @@
 #set text(font: "Helvetica")
 
 #show: cheatsheet.with(
-  title: "Cheatsheet Title", 
-  authors: "Authors",
+  title: "CS 482", 
+  authors: "Wasay Saeed",
   write-title: false,
   font-size: 5.5pt,
   line-skip: 5.5pt,
@@ -16,8 +16,6 @@
 )
 
 #include "units/00-general-formula.typ"
-#include "units/01-lorem-ipsum.typ"
-#include "units/02-lorem-ipsum.typ"
-#include "units/03-lorem-ipsum.typ"
-#include "units/04-lorem-ipsum.typ"
-#include "units/05-lorem-ipsum.typ"
+#include "units/02-sequence-alignment.typ"
+#include "units/03-phylogeny.typ"
+#include "units/04-genome-mapping.typ"

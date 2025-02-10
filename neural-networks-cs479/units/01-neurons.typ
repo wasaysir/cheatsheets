@@ -60,4 +60,19 @@ This is dimensioned. Dimensionless converts $v_(i n) = (v_(i n))/(v_(t h) - V_L)
 
 Then spike occurs when $v = 1$ and we set a refractory period of $t_(r e f)$ before starting at $0$ again.
 
-Explicit form: $v(t) = v_(i n)(1 - e^(- t/tau))$
+Explicit Model: $v(t) = v_(i n)(1 - e^(- t/tau))$
+
+*Firing Rate*: $1/(tau_("ref") - tau_m ln(1 - 1\v_in))$ for $v_(in) > 1$
+*Tuning Curve*: Graph showing how neuron reacts to different input currents.
+
+== Activation Functions (Sigmoidal)
+Logistic Curve: $1 / (1 + e^(-z))$
+Arctan: $arctan(z)$
+Hyperbolic Tangent: $tanh(z)$
+Threshold: $0 "if" z lt 0; 1 "if" z gt.eq 0$
+Rectified Linear Unit: $max(0, z)$
+Softplus: $log(1 + e^z)$
+
+=== Multi-Neuron Activation Functions
+SoftMax: $exp(z_i)/(sum_j exp(z_j))$ Converts elements to probability distribution (sum to 1) and normalizes values
+ArgMax: Largest element remains nonzero, everything else $0$
