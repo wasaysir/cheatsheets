@@ -46,7 +46,7 @@ $g_K$: Maximum K conductance
 
 Action Potential form:
 #figure(
-  image("../assets/image.png", width: 30%),
+  image("../assets/spike.png", width: 30%),
 )
 
 Process: Stimulus breaks threshold causing Na+ channels to open, then close at action potential. Potassium channels open at action potential and close at refractory period. 
