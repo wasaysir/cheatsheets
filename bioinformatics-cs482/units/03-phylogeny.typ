@@ -46,3 +46,8 @@ Then, add a new row/column to D, so that $D_(k, m) = D_(m, k) = 1/2 (D_(k, i) + 
 Given set of leaf nodes, for every pair, define new q-metric relative to other species, as $D_(i j) - (r_i + r_j), r_i = 1/(abs(L) - 2) sum_(k in L) d_(i k)$
 
 Then, find the smallest q-metric and combine the two species to make a new internal node as average of the two.
+
+== Jukes-Cantor
+
+
+== Maximum Parsimony
