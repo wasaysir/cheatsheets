@@ -20,7 +20,7 @@
 
 *Hierarchical Clustering*: Arrange sequences based on pairwise distance in hierarchical manner \
 
-*Well-behaved tree*: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time" \
+*Well-behaved tree*: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time". Also, the three-point condition is met, where for all distances, $x, y, z$, $d(x, y) lt.eq max(d(x, z), d(z, y))$ \
 
 == Distance-based methods
 === UPGMA
