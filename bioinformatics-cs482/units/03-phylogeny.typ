@@ -1,27 +1,26 @@
 = Phylogeny
-*MRCA*: Most Recent Common Ancestor
-*Internal Nodes*: Ancient hypothetical species
-*Leaf Nodes*: Extant species
-*Neighbour*: Two species that are most closely related on tree
-*Outgroup*:  
-*Clade*: Group of organisms with common ancestor
-*Outgroup*: Set of organisms that are not in the "ingroup", and are distant in the tree.
-*Homolog*: Descendant of common ancestor
-*Analog*: Similar but don't share ancestry
-*Ortholog*: Speciation event, where common ancestors break into two species
-*Paralog*: One gene breaks into two separate versions in same genome
-*Phylogeny*: Construction of evolutionary tree by evolutionary relationship
-*Morphology*: Construction of evolutionary tree by physical featuers
+*MRCA*: Most Recent Common Ancestor \
+*Internal Nodes*: Ancient hypothetical species \
+*Leaf Nodes*: Extant species \
+*Neighbour*: Two species that are most closely related on tree \
+*Clade*: Group of organisms with common ancestor \
+*Outgroup*: Set of organisms that are not in the "ingroup", and are distant in the tree. \
+*Homolog*: Descendant of common ancestor \
+*Analog*: Similar but don't share ancestry \
+*Ortholog*: Speciation event, where common ancestors break into two species \
+*Paralog*: One gene breaks into two separate versions in same genome \
+*Phylogeny*: Construction of evolutionary tree by evolutionary relationship \
+*Morphology*: Construction of evolutionary tree by physical featuers \
 
 3 problems: *Topology*, *Root*, *Branch Lengths*
 
-*Cladogram*: Tree where branch length has no meaning
-*Phylogram*: Tree where branch length conveys genetic change
-*Ultrametric tree*: Tree where branch length conveys time
+*Cladogram*: Tree where branch length has no meaning \
+*Phylogram*: Tree where branch length conveys genetic change \
+*Ultrametric tree*: Tree where branch length conveys time \
 
-*Hierarchical Clustering*: Arrange sequences based on pairwise distance in hierarchical manner
+*Hierarchical Clustering*: Arrange sequences based on pairwise distance in hierarchical manner \
 
-*Well-behaved tree*: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time"
+*Well-behaved tree*: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time" \
 
 == Distance-based methods
 === UPGMA
@@ -34,8 +33,8 @@ Given distance matrix, find closest pair of species, then combine them to a "new
 This best describes topology and distance of species.
 
 === Neighbour Joining
-*Additive Matrix*: There exists an additive tree fitting the matrix
-*Additive Tree*: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$
+*Additive Matrix*: There exists an additive tree fitting the matrix \
+*Additive Tree*: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$ \
 *Four-Point Theorem*: Distance matrix is additive iff two of the sums are equal and third is less than or equal to other sums: 
 #image("../assets/fourpoint.png")
 
@@ -107,13 +106,16 @@ $pi_X$ is stationary probability of nucleotide $X$, $X$ is possible ancestral st
 
 == Summary
 #table(
+  table.header(
+    [*Methods*], [*Optimality Criterion*]
+  ),
   columns: 2,
-  [
-    [*Methods*, *Optimality criterion*],
-    [Distance methods, Distance],
-    [Maximum Parsimony, Parsimony],
-    [Maximum Likelihood, Likelihood],
-  ]
+  [Distance Methods],
+  [Distance],
+  [Maximum Parimsony],
+  [Parimsony],
+  [Maximum Likelihood],
+  [Likelihood],
 )
 
 Note top-to-bottom is increasing accuracy and decreasing efficiency.
