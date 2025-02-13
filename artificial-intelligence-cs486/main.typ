@@ -15,6 +15,11 @@
   numbered-units: false,
 )
 
+#set heading(numbering: (first, ..other) => {
+  if other.pos().len() <= 0 and first > 1{ 
+    return first - 1
+}})
+
 #include "units/00-general-formula.typ"
 #include "units/01-agents.typ"
 #include "units/02-search.typ"
