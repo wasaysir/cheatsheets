@@ -7,11 +7,11 @@ Have:
 - Past Experiences
 - Actions
 
-*Belief State*: Internal belief about the world
-*Knowledge*: Information used to solve tasks
-*Representation*: Data structure to encode knowledge
-*Knowledge Base*: Representation of all knowledge possessed
-*Model*: How KB relates to world
+\ Belief State: Internal belief about the world
+\ Knowledge: Information used to solve tasks
+\ Representation: Data structure to encode knowledge
+\ Knowledge Base: Representation of all knowledge possessed
+\ Model: How KB relates to world
 
 == Dimensions of Complexity
 1. Modularity
