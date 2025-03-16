@@ -10,10 +10,10 @@
 
 === CSPs as graphs
 Search spaces can be very large, path isn't important, only goal, and no set starting nodes make this bad idea
-*Complete Assignment*:
+\ Complete Assignment:
 Nodes: Assignment of value to all variables
 Neighbors: Change one variable value
-*Partial Assignment*:
+\ Partial Assignment:
 Nodes: Assignment to first $k-1$ variables
 Neighbors: Assignment to $k^"th"$ variable
 
@@ -26,11 +26,11 @@ Exhaust every possible assignment of vars and test validity
 Order all variables and evaluate constraints in order as soon as they are fixed. (Ex: $A = 1 and B = 1$ is inconsistent with $A eq.not B$ so go to last assigned variable and change its value)
 === Consistency
 Represent constraints as network to determine how all variables are related.
-*Domain Constraint*: Unary constraint on values in domain written $angle.l X, c(X) angle.r$ (Eg: $B, B eq.not 3$)
-*Domain Consistent*: A node is domain consistent if no domain value violates any domain constraint, and a network is domain consistent if all nodes are domain consistent.
-*Arc*: Arc $angle.l X, c(X, Y) angle.r$ is a constraint on $X$
-*Arc Consistent*: Arc $angle.l X, c(X, Y) angle.r$ is arc consistent if for every valid x there is a valid y such that constraint is satisfied.
-*Path Consistent*: A set of variables is path consistent if all arcs and domains are consistent.
+\ Domain Constraint: Unary constraint on values in domain written $angle.l X, c(X) angle.r$ (Eg: $B, B eq.not 3$)
+\ Domain Consistent: A node is domain consistent if no domain value violates any domain constraint, and a network is domain consistent if all nodes are domain consistent.
+\ Arc: Arc $angle.l X, c(X, Y) angle.r$ is a constraint on $X$
+\ Arc Consistent: Arc $angle.l X, c(X, Y) angle.r$ is arc consistent if for every valid x there is a valid y such that constraint is satisfied.
+\ Path Consistent: A set of variables is path consistent if all arcs and domains are consistent.
 
 === AC-3
 Make Consistency network arc consistent

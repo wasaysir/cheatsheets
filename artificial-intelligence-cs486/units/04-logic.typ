@@ -71,7 +71,11 @@ Assumptions:
 \ Action: Partial function from state to state
 \ Partial Function: Some actions are not possible in some states, preconditions specify when action is valid, and effect determines next state
 
-\ Feature-based representation of actions: For each action, there is a precondition (proposition) that specifies when action is valid.
+== State Representations
+
+\ Feature-based representation of actions: For each action, there is a precondition (proposition) that specifies when action is valid and a set of consequences for features after action.
+\ State-based representation: For each possible assignment of features, define a state. Then for each action define the starting and ending state for the state-based graph.
+
 \ Causal Rule: When feature gets a new value
 \ Frame Rule: When feature keeps its value
 _Features are capitalized, but values aren't_

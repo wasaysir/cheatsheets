@@ -1,7 +1,7 @@
 #import "@preview/lovelace:0.3.0": *
 
 = Learning
-*Learning*: Ability to improve behaviour based on experience. Either improve range (more abilities), accuracy, or speed.
+\ Learning: Ability to improve behaviour based on experience. Either improve range (more abilities), accuracy, or speed.
 
 *Components of learning problem*:
 - Task: Behaviour to improve (Ex: Classification)
@@ -21,55 +21,65 @@
 - Unsupervised learning: No classifications given, learner has to discover categories from data
 - Reinforcement learning: Feedback occurs after a sequence of actions
 
-*Metrics*:
+\ Metrics:
 Measure success by how well agent performs for new examples, not training.
-*P agent*: Consider this agent that claims negative training data are the only negative instances, and gives positive otherwise (100% training data, bad test)
-*N agent*: Same as N agent, but considers only positive training data.
+\ P agent: Consider this agent that claims negative training data are the only negative instances, and gives positive otherwise (100% training data, bad test)
+\ N agent: Same as N agent, but considers only positive training data.
 They both have 100% on training data, but disagree on everything else.
 
-*Bias*:
+\ Bias:
 Tendency to prefer one hypothesis over another. Necessary to make predictions on unseen data. You can't evaluate hypotheses by the training data, it depends on what works best in practice (unseen data).
 
-*Learning as search*: Given representation and bias, learning is basically a search through all possible representations looking for representation that best fits the data, given the bias. However, systematic search is infeasible, so we typically use a *search space*, *evaluation function*, and a, *search method*
+\ Learning as search: Given representation and bias, learning is basically a search through all possible representations looking for representation that best fits the data, given the bias. However, systematic search is infeasible, so we typically use a *search space*, *evaluation function*, and a, *search method*
+
+\ Interpolation: Inferring results in between training examples (Ex: Train on 1,2,4,5. Test on 3)
+\ Extrapolation: Inferring results beyond training examples (Ex: Train on 1, 2, 4, 5. Test on 1000)
 
 == Supervised Learning
 Given input features, target features, training examples and test examples we want to predict the values for the target features for the test examples. 
-*Classification*: When target features are discerete.
-*Regression*: When target features are continuous.
+\ Classification: When target features are discerete.
+\ Regression: When target features are continuous.
 
-*Noise*: Sometimes features are assigned wrong value, or inadequate for predicting classification, or missing features. 
-*Overfitting*: Distinction appears in data that doesn't exist in unseen examples (through random correlations)
+\ Noise: Sometimes features are assigned wrong value, or inadequate for predicting classification, or missing features. 
+\ Overfitting: Distinction appears in data that doesn't exist in unseen examples (through random correlations)
 
 == Evaluating Predictions
 $Y(e)$ is value of feature $Y$ for example $e$
 $accent(Y, hat)(e)$ is predicted value of feature $Y$ for example $e$ from the agent.
-*Error* is prediction of how close $accent(Y, hat)(e)$ is to $Y(e)$
+\ Error: Prediction of how close $accent(Y, hat)(e)$ is to $Y(e)$
+
+=== Types of Features
+\ Real-Valued Features: Values are totally-ordered. Ex: Height, Grades, Shirt-size. (The finitenss of the domain of values is irrelevant)
+
+\ Categorical Features: Domain is fixed finite set. (Total-ordering is irrelevant). Point estimates are either definitive predictions or probabilistic predictions for each category.
 
 === Measures of Error
-- Absolute error: $sum_(e in E) sum_(Y in T) abs(Y(e) - accent(Y, hat)(e))$
-- Sum of squares: $sum_(e in E) sum_(Y in T) (Y(e) - accent(Y, hat)(e))^2$
-- Worst-case: $max_(e in E) max_(Y in T) abs(Y(e) - accent(Y, hat)(e))$
+\ Absolute error: $sum_(e in E) sum_(Y in T) abs(Y(e) - accent(Y, hat)(e))$
+\ Sum of squares: $sum_(e in E) sum_(Y in T) (Y(e) - accent(Y, hat)(e))^2$
+\ Worst-case: $max_(e in E) max_(Y in T) abs(Y(e) - accent(Y, hat)(e))$
 - Cost-based error takes into account costs of various errors, so some are more costly than others.
+\ Mean Log Loss: For probabilistic predictions, calculate the mean log loss ($"logloss"(p, a) = - log(p[a])$) for all predictions (p = pred, a = acc). Mean log loss is a transformation of log-likelihood, so minimizing mean log loss finds highest likelihood.
+\ Binary Log Loss: $"logloss"(p, a) = -a log p - (1-a) log(1-p)$ is a variant for boolean features.
 
 === Precision and Recall
-*Recall*: Percentage of positive statements that are accurately predicted
-*Specificity*: Percentage of negative statements that are accurately predicted
-*Precision*: Percentage of predicted truths that are correct.
+\ Recall: Percentage of positive statements that are accurately predicted
+\ Specificity: Percentage of negative statements that are accurately predicted
+\ Precision: Percentage of predicted truths that are correct.
 
-*Receiver Operating Curve*: A graph between True positives and False Positives
+\ Receiver Operating Curve: A graph between True positives and False Positives
 
 #figure(
     image("../assets/receiverOperatingCurve.png")
 )
 
-*Basic Models*: Decision Trees, Linear classifiers (Generalize to Neural Networks), Bayesian Classifiers
+\ Basic Models: Decision Trees, Linear classifiers (Generalize to Neural Networks), Bayesian Classifiers
 
 = Decision Trees
-*Representation* is a decision tree
-*Bias* is towards a simple decision tree
-*Nodes*: Input attributes/features
-*Branches*: Labeled with input feature values (can have multiple feature values)
-*Leaves*: Predictions for target features (point estimates)
+- Representation: Decision tree
+- Bias: Tendency towards a simple decision tree
+\ Nodes: Input attributes/features
+\ Branches: Labeled with input feature values (can have multiple feature values)
+\ Leaves: Predictions for target features (point estimates)
 Search through the space of decision trees from simple to complex decision trees
 
 *Learning*:
@@ -159,3 +169,149 @@ Methods to fix:
         - Complicated model, not enough data (low bias, high variance)
         - Simple model, lots of data (high bias, low variance)
     - Capacity: Ability to fit wide variety of functions (inverse of bias)
+
+== Linear Regression
+The goal is to fit a linear function a set of real-valued training data. 
+The linear function would be a combination of weights, which we can optimize over by taking the partial derivative of the loss for each weight, setting to 0, and solving the linear system (ex. a la RANSAC)
+
+=== Squashed Linear Functions
+Linear functions don't make sense for *binary classification* because we shouldn't extrapolate beyond the domain $[0, 1]$ which linear functions allow us to do. The solution is to use a function with domain $[-infinity, infinity]$ and range $[0, 1]$ to transform a linear function onto sensical binary domain.
+
+\ Activation Function: Funciotn that transforms from real $(- infinity, infinity)$ to subset $[0, 1]$
+
+To determine weights for a squashed linear function, you need to minimize the *log loss*. 
+
+\ Log Loss: $"LL"(E, w) = -1/abs(E) times sigma_(e in E) (Y(e) times log accent(Y, hat)(e) + (1 - Y(e)) times log(1 - accent(Y, hat)(e)))$ ($accent(Y, hat)(e)$) is the predicted value after transformation. To optimize for this function, take partial derivatives for each weight and find their minimal.
+
+=== Stochastic Gradient Descent
+The goal is to find a local minimum of weights according to some error function, based on some initial value, learning rate, and partial derivative of weights to error.
+
+The definition of gradient descent requires all training data to be interetpreted. Stochastic gradient descent uses a random sample (batch) before updating its weights.
+
+\ Batch: Set of $b$ examples used in each update
+\ Epoch: $ceil(abs(E s)/b)$ batches, which is one pass through all data (on average)
+
+*Linear Learner*:
+#pseudocode-list[
+    + *Inputs*: 
+        + _Xs_: set of input features
+        + _Y_: Target Feature
+        + _Es_: Set of training examples
+        + $eta$: learning rate
+        + $b$: batch size
+    + *Output*: Funciton to make prediction on examples
+    + *Algorithm*:
+        + Initialize weights randomly
+        + Define squashed linear regression prediction function
+        + initialize derivative values to 0
+        + Select batch _B_ of size $b$ from _Es_
+        + *for each* example _e_ in _B_
+            + Predict target and find error
+            + for each weight, add the partial derivative of error to derivative values
+        + *for each* weight take gradient descent step
+    + *Return*: Prediction algorithm based on weights
+]
+
+Smaller batch sizes learn faster, but may not converge to local optimum, because you're more influenced by the randomness of your selection process. 
+
+\ Incremental Gradient Descent: Select batches of size 1 to update. Used for streaming data where each example is used once and then discarded. 
+\ Catastrophic forgetting: Discarding older data (and not using it again) means you fit later data better but forget earlier examples.
+
+=== Linear Separability
+Each input feature can be viewed as a dimension, and a hyperplane can separate an $m$-dimensional space into two spaces.
+\ Linearly separable: A dataset is linearly separable if there exists a hyperplane where the classification is true on one side and false on other side.
+
+=== Categorical Target Features
+\ Indicator Variables: Technique to transform a categorical feature into a set of binary variables (If you have a categorical feature or not)
+
+One issue with indicator variables is that, if we can only use one value, then the predicted probabilities should add to 1. One way to ensure this is to only learn for all but one variables and make the remaining variable's value the difference to 1, but this doesn't work because errors for other values accumulate but the non-trained value's errors don't. 
+
+One solution is to find a linear function for each value, exponentiate, and normalize. For instance, take the softmax function:
+
+$"softmax"((alpha_1, dots, alpha_k))_i = (exp(alpha_i)/(sum^k_(j=1) exp(alpha_j)))$
+
+This guarantees all values are positive and sum to 1, so are proper analogs for probability distribution.
+
+\ Multinomial Logistic Regression: Given the categorical functions with $k$ values, we can generalize our linear function into $u_j(e) = w_(0, j) + X_1(e) times w_(1, j) + dots + X_m(e) times w_(m, j)$ Note we have one linear function for each output value, so our weights are $w_(i j)$ for input i, output j.
+
+\ Categorical Log Loss: Take the log loss of the softmax function.
+
+#image("../assets/categoricalLogLoss.png")
+Here we only compare the predicted target value against the test target feature.
+
+\ One-hot encoding: Given complete set of values where only one value is $1$ and rest are $0$
+
+== Overfitting
+A complex model (with many degrees of freedom) has a better chance of fitting to the training data. 
+
+\ Bias: The error due to the algorithm finding an imperfect model. This is the deviation between the model found and the ground truth model.
+
+\ Representation Bias: Representation does not contain a model close to the ground truth
+\ Search Bias: Algorithm hasn't searched enough of the search space to find a better model. 
+
+\ Variance: Error from lack of data. 
+
+\ Bias-Variance Trade-Off: Complicated models can be accurate, but without sufficient data it can't estimate it properly (low bias, high variance). Simple models cannot be accurate, but can estimate model well given data (high bias, low variance)
+
+\ Noise: Inherent error due to data depending on features not modeled or because data collection is inherently stochastic.
+
+\ Overconfidence: Learner is more confident in prediction than data warrants. 
+
+=== Pseudocounts
+Optimal prediction is usually the mean, however, this is not a good estimate for new cases, so we minimize the weight of the mean through pseudo-examples:
+
+$accent(v, hat) = (c times a_0 + sum_i v_i)/(c + n)$, this value is a "weighted" mean, which minimizes the relative influence of the actual mean. $a_0$ is some defined set value. 
+
+=== Regularization
+
+In addition to trying to fit a model to data, also include a term that rewards simplicity and penalizes complexity. 
+
+\ Ridge Regression: A linear regression function with an L2 regularizer
+\ Lasso (Least Absolute Shrinkage and Selection Operator): Loss function + L1 regularizer
+
+\ Feature Selection: The use of specific features for calculation. L1 regularization does this by making many weights zero.
+
+=== Cross Validation
+Instead of separate training and test sets, we go one step further. We have one training set, one validation set, and one test set (each completely separate).
+
+\ Validation Set: This is an emulation of the test set, used to optimize the hyperparameters of the model. 
+
+Note, we want to train on as many examples as possible to get better models, so partitioning our data into three is not ideal. We use *k-fold cross validation*.
+
+*k-fold cross validation*:
+- Partition non-test examples randomly into $k$ sets of approximately equal size, called folds. 
+- For each parameter, train $k$ times for that parameter setting, using one of the folds as the validation set and remaining folds for training. 
+- Optimize parameter settings based on validation errors
+- Return model with selected parameters trained on all data.
+
+== Composite Models
+Although linear functions and decision trees can't be used to represent many functions, combining linear functions with non-linear inputs is a way to use simple linear models but make them more accurate.
+
+\ Kernel Function: Function applied to input features to create new features. (Ex. $x^2, x^3, x y$)
+
+\ Regression Tree: Decision Tree with constant function at each leaf (piecewise constant function)
+
+\ Piecewise Linear Function: Decision Tree with linear function at leaves.
+
+\ Ensemble Training: Using multiple learners, combine outputs via some function to create an ensemble prediction. 
+
+\ Base-level algorithms: Algorithms used as inputs for ensemble learners.
+
+\ Random Forest: Using multiple decision trees make predictions through each tree and combine outputs. This works best if trees make diverse predictions: Each tree uses different subset of examples to train on (bagging) or subset of conditions for splitting are used. 
+
+=== Boosting
+\ Boosting: Sequence of learners where each learns from errors of previous ones.
+
+*Boosting Algorithm*:
+- Base learners exist in sequence.
+- Each learner is trained to fit examples previous learners didn't fit well.
+- Final prediction uses a composite of predictions of each learner.
+- Base learners don't have to be good, but have to be better than random.
+
+\ Functional Gradient Boosting: 
+Given hyperparameter $K$ with $K$ base learners, final prediction as function of inputs is $p_0 + d_1(X) + dots + d_k(X)$ where $p_0$ is initial prediction and $d_i$ is difference from previous prediction (i.e. $p_i(X) = p_(i-1)(X) + d_i(X)$) 
+Given $p_(i-1)$ is fixed, the learners meant to optimize for $accent(d_i, hat)$ optimize for: $sum_e "loss"(p_(i-1)(e) + accent(d_i, hat)(e), Y(e)) = sum_e "loss"(accent(d_i, hat)(e), Y(e) - p_(i-1)(e))$
+
+=== Gradient-Boosted Trees
+\ Gradient-Boosted Trees: Linear models where features are decision trees with binary splits, learned using boosting.
+
