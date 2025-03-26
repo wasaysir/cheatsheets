@@ -315,3 +315,28 @@ Given $p_(i-1)$ is fixed, the learners meant to optimize for $accent(d_i, hat)$ 
 === Gradient-Boosted Trees
 \ Gradient-Boosted Trees: Linear models where features are decision trees with binary splits, learned using boosting.
 
+The prediction for example $(x_e, y_e)$ is $accent(y_e, hat) = sum^K_(k=1) f_k(x_e)$
+
+Each $f_k$ is a decision tree, each leaf has a corresponding output $w_j$ (we call this the weight because of how it weighs to the larger sum). We also have a function $q$ which corresponds to the if-then-else structure of the tree. For simplicity, we represent $w$ as a single vector of weights, so instead of the tree hierarchy, we use a vector to store all the weights for quick compute, and $q$ maps onto this vector (just so simplify tree traversal).
+
+The loss function is: $cal(L) = (sum_e (accent(y_e, hat) - y_e)^2) + sum_(k=1)^K Omega(f_k)$
+
+$Omega(f) = gamma dot abs(W) + 1/2 lambda dot sum_j w_j^2$, this is the regularization term to minimize the weights. $abs(W)$ minimizes the number of leaves. The lambda product minimizes the values of the parameters. $gamma$ and $lambda$ are non-negative learnable parameters.
+
+==== Choosing Leaf Values
+The model is learnt using boosting, so each tree is learned sequentially. Consider building the $t$th tree, where previous are fixed. Assume (for simplicity) that the tree structure (q) is fixed. Lets optimize for the weight of a single leaf $w_j$. Let $I_j = {e | q(x_e) = j}$ be the set of training examples that map to the $j$th leaf. 
+
+Since the $t$th tree is learnt, for regression, the loss for the $t$th tree is:
+$cal(L)^((t)) = 1/2 lambda * sum_j w_j^2 + sum_e (y_e - sum^t_(k=1) f_k(x_e))^2 + "constant" = 1/2 lambda * sum_j w_j^2 + sum_e (y_e - sum^(t-1)_(k=1) f_k(x_e) - w_j)^2 + "constant" $ where constant is regularization values for previous trees and size of tree.
+
+Therefore, the minimum value for $w_j$ is $w_j = (sum_(e in I_j)(y_e - accent(y_e, hat)^((t-1))))/(abs(I_j) + lambda)$
+
+For classification, when you take the derivative, it's difficult to solve analytically, so instead an approximation is used in the opposite step of the gradient. 
+
+==== Choosing Splits
+Proceed greedily. Start with single leaf, find best leaf to expand to minimize loss. For small datasets look through every split, for larger splits, take subsamples or pre-computed percentiles. 
+
+=== No-Free-Lunch Theorem
+No matter the training set, for any two definitive predictors A and B, there are as many functions from the input feature sto target features consistent with evidence that A is better than B on off-training set (examples not in training) as when B is better than A on off-training set.
+
+Consider m-Boolean input features, then there are $2^m$ assignments of input features, and $2^(2^m)$ functions from assignments onto {0, 1}. If we assume uniform distribution over functions, we can use $2^m$ bits to represent a function (one bit for each assignment, basically a lookup), and memorize the training data. Then for a training set of size $n$, we'll set $n$ of these bits, but the remaining bits are free to be assigned in any way, as in there is a wide class of functions that it could be.
