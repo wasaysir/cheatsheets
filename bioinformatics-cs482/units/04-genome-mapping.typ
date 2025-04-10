@@ -65,3 +65,4 @@ Note that you can turn an Eulerian path into an Eulerian cycle by adding an edge
 *Graph Cleaning*: Remove "sink" nodes in De Brujin graph and combine divergence structures that converge to a single node later through the graph.
 
 *Contig Assembly*: Use Euler algorithm to identify strongly connected regions in the genome and use thae path to determine the full contig.
+
