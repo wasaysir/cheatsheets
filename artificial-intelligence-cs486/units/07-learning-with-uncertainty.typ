@@ -43,4 +43,11 @@ We can say $A$ is independent of $B$ given $C$ if learning $C$ makes $B$ irrelev
 
 \ Conditional Probability Table: Stores probability distribution on $X$ given parents. $P(X_i | "parents"(X_i))$ for each $X_i$
 
-#image("image.png")
+#image("../assets/conditional_probability_table.png")
+
+== Updating Beliefs
+Given prior belief $P(h)$, and evidence $e$ with likelihood given hypothesis $P(e | h)$, posterior belief after observing evidence is $P(h | e)$. You can calculate this posterior with Bayes' Rule. 
+
+$
+  P(h | e) = (P(e | h)P(h))/P(e) = (P(e | h)P(h))/(sum)
+$
