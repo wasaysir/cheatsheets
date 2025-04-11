@@ -26,3 +26,8 @@
 #include "units/03-constraints.typ"
 #include "units/04-logic.typ"
 #include "units/05-supervised.typ"
+#include "units/06-reasoning-under-uncertainty.typ"
+#include "units/07-learning-with-uncertainty.typ"
+#include "units/08-neural-networks.typ"
+#include "units/09-planning-with-uncertainty.typ"
+#include "units/10-reinforcement-learning.typ"
