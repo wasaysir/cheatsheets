@@ -30,11 +30,15 @@ Samples are detected by mass over charge. To differentiate between same ratios, 
 
 #image("../assets/integer_mass_table.png")
 
-Note that we fragment peptides in MS, and derive the masses for each peptide chain to derive the entire sequence of the protein.
+Note that we fragment peptides in MS, and derive the masses for each peptide chain to derive the entire sequence of the protein. For instance, given a peptide ANELLLNVK, we will fragment it into A, NELLLNVK, AN, ELLLNVK, ANE, LLLNVK, etc. We can then determine the peptide by daisy chaining in reverse. 
 
 == MS Interpretations
+
+2 ways to interpret MS/MS spectra: Search through existing protein databases or do de novo sequencing.
 
 To search through the database, given a known protein sequence, use enzyme digestion rule to cut into peptides, and for each peptide compare with spectrum to see how well it matches the derived peptide fragments.
 
 #image("../assets/manual-de-novo-sequencing.png")
+
+#image("../assets/real-spectra-sequencing.png")
 
