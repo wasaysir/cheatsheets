@@ -1,41 +1,41 @@
 = Phylogeny
-*MRCA*: Most Recent Common Ancestor \
-*Internal Nodes*: Ancient hypothetical species \
-*Leaf Nodes*: Extant species \
-*Neighbour*: Two species that are most closely related on tree \
-*Clade*: Group of organisms with common ancestor \
-*Outgroup*: Set of organisms that are not in the "ingroup", and are distant in the tree. \
-*Homolog*: Descendant of common ancestor \
-*Analog*: Similar but don't share ancestry \
-*Ortholog*: Speciation event, where common ancestors break into two species \
-*Paralog*: One gene breaks into two separate versions in same genome \
-*Phylogeny*: Construction of evolutionary tree by evolutionary relationship \
-*Morphology*: Construction of evolutionary tree by physical featuers \
+\ MRCA: Most Recent Common Ancestor \
+\ Internal Nodes: Ancient hypothetical species 
+\ Leaf Nodes: Extant species \
+\ Neighbour: Two species that are most closely related on tree \
+\ Clade: Group of organisms with common ancestor \
+\ Outgroup: Set of organisms that are not in the "ingroup", and are distant in the tree. \
+\ Homolog: Descendant of common ancestor \
+\ Analog: Similar but don't share ancestry \
+\ Ortholog: Speciation event, where common ancestors break into two species \
+\ Paralog: One gene breaks into two separate versions in same genome \
+\ Phylogeny: Construction of evolutionary tree by evolutionary relationship \
+\ Morphology: Construction of evolutionary tree by physical featuers \
 
 3 problems: *Topology*, *Root*, *Branch Lengths*
 
-*Cladogram*: Tree where branch length has no meaning \
-*Phylogram*: Tree where branch length conveys genetic change \
-*Ultrametric tree*: Tree where branch length conveys time \
+\ Cladogram: Tree where branch length has no meaning \
+\ Phylogram: Tree where branch length conveys genetic change \
+\ Ultrametric tree: Tree where branch length conveys time \
 
-*Hierarchical Clustering*: Arrange sequences based on pairwise distance in hierarchical manner \
+\Hierarchical Clustering: Arrange sequences based on pairwise distance in hierarchical manner \
 
-*Well-behaved tree*: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time". Also, the three-point condition is met, where for all distances, $x, y, z$, $d(x, y) lt.eq max(d(x, z), d(z, y))$ \
+\Well-behaved tree: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time". Also, the three-point condition is met, where for all distances, $x, y, z$, $d(x, y) lt.eq max(d(x, z), d(z, y))$ \
 
 == Distance-based methods
 === UPGMA
-*UPGMA*: Unweighted Pair Group Method with Arithmetic Mean
+\UPGMA: Unweighted Pair Group Method with Arithmetic Mean
 
-*Linkage Criterion*: Distance metric between two groups (not just sequences, but 2 separate groups of sequences)
+\Linkage Criterion: Distance metric between two groups (not just sequences, but 2 separate groups of sequences)
 
 Given distance matrix, find closest pair of species, then combine them to a "new node" and recalculate the values for it and the remaining sequences by $"UPGMA" = "Sum of pairwise distances" / "Number of pairs"$ and continue until you're done.
 
 This best describes topology and distance of species.
 
 === Neighbour Joining
-*Additive Matrix*: There exists an additive tree fitting the matrix \
-*Additive Tree*: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$ \
-*Four-Point Theorem*: Distance matrix is additive iff two of the sums are equal and third is less than or equal to other sums: 
+\Additive Matrix: There exists an additive tree fitting the matrix \
+\Additive Tree: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$ \
+\Four-Point Theorem: Distance matrix is additive iff two of the sums are equal and third is less than or equal to other sums: 
 #image("../assets/fourpoint.png")
 
 
@@ -52,7 +52,7 @@ Jukes-Cantor is a tool to recompute distances based on back-mutations for more a
 
 Assumptions: 
 1. All nucleotide bases occur with equal probability
-2. Ech base has equal probability of mutating into any other
+2. Each base has equal probability of mutating into any other
 3. Substitutions occur independently
 
 Let $p_A(t), p_C(t), dots$ is probability that a given site contains nucleotide $A, C, dots$ at time $t$.
@@ -101,8 +101,8 @@ $pi_X$ is stationary probability of nucleotide $X$, $X$ is possible ancestral st
 *Final Step*: $L(T) = sum_X pi_X L_("root")(X)$
 
 === Tree Space Search
-*Stepwise Addition*: Start from minimum tree (3 taxa) and add taxa, then optimize topology. 
-*Use starting tree*: A tree with all taxa but is less accurate. Either use a cheap method for construction or randomly create.
+\Stepwise Addition: Start from minimum tree (3 taxa) and add taxa, then optimize topology. 
+\Use starting tree: A tree with all taxa but is less accurate. Either use a cheap method for construction or randomly create.
 
 == Summary
 #table(
