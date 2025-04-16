@@ -85,13 +85,13 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 
 - *Initialization*: Top-left, i.e. $M(0,0) = 0$  
 - *Iteration*:  
-  $$
-  M(i,j) = \max\Bigl\{
-    M(i-1,j) + \text{Gap},\,
-    M(i,j-1) + \text{Gap},\,
-    M(i-1,j-1) + S(i,j)
-  \Bigr\}
-  $$
+  $
+    M(i, j) = max cases(
+      M(i-1, j) + "Gap Pen",
+      M(i, j-1) + "Gap Pen",
+      M(i-1, j-1) + S(i, j)
+    )
+  $
 - *Termination*: Bottom-right  
 - *Traceback*: Start from bottom-right and end at top-left  
 
@@ -99,14 +99,14 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 
 - *Initialization*: Top row/left column ($M(0,j)=0$ and $M(i,0)=0$)
 - *Iteration*:
-  $$
-  M(i,j) = \max\Bigl\{
-    0,\,
-    M(i-1,j) + \text{Gap},\,
-    M(i,j-1) + \text{Gap},\,
-    M(i-1,j-1) + S(i,j)
-  \Bigr\}
-  $$
+  $
+    M(i, j) = max cases(
+      0,
+      M(i-1, j) + "Gap Pen",
+      M(i, j-1) + "Gap Pen",
+      M(i-1, j-1) + S(i, j)
+    )
+  $
 - *Termination*: Anywhere  
 - *Traceback*: Start from the highest-scored cell and end when $M(i,j)$ is 0.  
 

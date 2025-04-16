@@ -81,3 +81,10 @@
 #image("../assets/gene-chromosomes.png")
 
 #image("../assets/codon-table.png")
+
+=== Alternative Splicing:
+\ Normal splicing: All exons included
+\ Exon Skipping: One exon skipped
+\ Alternative 5' splice site: Start of exon changes (Exon is shorter or starts at different spot than desired)
+\ Alternative 3' splice site (end of exon changes, ends earlier or later than usual)
+\ Intron retention: Intron isn't removed

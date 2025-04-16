@@ -8,13 +8,18 @@
 
 \ Maxpooling layer: Convolutional layer that takes largest value in pool
 
+== DNA Barcoding
+Identifying species based on short, standardized region of DNA by colelcting sample; extracting DNA from sample; amplifying specific gene region (barcode) using PCR. [For animals we use mitochondiral COI gene]. Sequence the barcode region. Compare sequence to reference database to identify the species.
+
 == Applications
+
+\ Transcription Factors and RNA-binding proteins: Regulating factors of genes by binding to DNA/RNA
 
 Splicing defects, genetic mutations, pathogenic variants, can all lead to improper genome sequencing, which is a hurdle for accurate DNA barcoding. 
 
 \ SpliceAI: Deep Learning model trained on GENCODE-annotated exon-intron boundaries; With large sequence window it is able to learn splicing patterns, and identify pathogenic splicing mutations.
 
-\ DeepBind: Deep Learning Model using CNN to find identify where along gene sequences, proteins (Transcription Factors) are most likely to bind. Then, with this model you can predict bind affinity for new sequences.
+\ DeepBind: Deep Learning Model using CNN to identify where along gene sequences proteins (Transcription Factors) are most likely to bind. Then, with this model you can predict bind affinity for new sequences.
 
 \ DeepVariant: CNN-based model trained on labeled sequencing data; converts aligned reads to images; predicts substitutions and indels with high precision and recall.
 
