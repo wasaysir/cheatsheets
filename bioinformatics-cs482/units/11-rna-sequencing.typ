@@ -10,7 +10,7 @@ Procedure:
 + Machine shines laser on chip, and determines gene activity by fluorescent tags.
 
 Advantages:
-+ can focus on small regions, even few molecules/cell
++ Can focus on small regions, even few molecules/cell
 
 \ RNA-Seq Technology: More advanced version of RNA sequencing that doesn't tag to known sequences, but rather sequences actual RNA sequence.
 
@@ -52,11 +52,15 @@ By classification, we can extract features from data that best assign elements t
 + Divide gene read count by total read normalized read count
 + Divide by Transcript length divided by 1000
 
+#image("../assets/rpkm.png")
+
 However RPKM is biased if a few genes are abnormally expressed, that affects normalization. Further, a single gene can have multiple isoforms (alternative splicing, different transcription start sites, etc), which means reads can map to shared exons. Then it is difficult to tell just from read expression which isoform gene was expressed most. 
 
 Instead of of finding gene expression, we can find transcript expression, and use the location of when they were expressed to find gene expression. 
 
 === Transcript Quantification
+#image("../assets/transcript-quantification.png")
+
 Since each read is additive, we want to optimize weights for each transcript by minimizing:
 
 $
@@ -80,6 +84,10 @@ Statistical analysis of genes: We cannot run hypothesis testing on each gene ind
 
 \ MA plot: Compare log ratio (how much gene changed between two conditions) and mean average (overall expression). Large changes given low expression ar eless significant, so MA plots reflect that uncertainty.
 
+#image("../assets/ma-plot.png")
+
 \ Volcano Plot: Compares log ratio to p-value (statistical significance of change). Ideally you'd have a large change tied to statistically significant change. 
+
+#image("../assets/volcano-plot.png")
 
 \ Simpson's paradox: Trend appears in groups of data but disappears when groups are combined.  
