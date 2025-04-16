@@ -4,32 +4,32 @@
 
 == DNA Errors
 
-\ Substitution: Flip one base for another (Mismatch Error) \
-\ Indel: Insert/Delete base in sequence (Gap Error) \
-\ Transition: Replace a Purine with a purine; replace pyrimidine with pyrimidine. \
-\ Transversion: Convert Purine to pyrimidine, vice versa. More expensive than transitions \
-\ Transposon: Delete/Insert whole region from sequence and insert to another
+/ Substitution: Flip one base for another (Mismatch Error) \
+/ Indel: Insert/Delete base in sequence (Gap Error) \
+/ Transition: Replace a Purine with a purine; replace pyrimidine with pyrimidine. \
+/ Transversion: Convert Purine to pyrimidine, vice versa. More expensive than transitions \
+/ Transposon: Delete/Insert whole region from sequence and insert to another
 
 == Similarity Heuristics
-\ Hamming Distance: Number of different positions within string
+/ Hamming Distance: Number of different positions within string
 _Ex_: ATCTCA vs ATCACA is 1 \
-\ Normalized Hamming Distance: $"Hamming Distance" / "len(Seq)"$ (Assume sequences same length)
-\ Edit Distance: Minimum-weight series of edit operations transforming $a$ into $b$
+/ Normalized Hamming Distance: $"Hamming Distance" / "len(Seq)"$ (Assume sequences same length)
+/ Edit Distance: Minimum-weight series of edit operations transforming $a$ into $b$
 _Ex_: TGCAGT TCACAGT (Switch G to C, remove A, d= 2)
-\ Substitution Matrix: Cost of switching one base to another (since transitions and transversions cost different amounts)
-\ BLOSUM62: Most classical amino acid substitution matrix
+/ Substitution Matrix: Cost of switching one base to another (since transitions and transversions cost different amounts)
+/ BLOSUM62: Most classical amino acid substitution matrix
 
 #image("../assets/blosum62.png")
 
-\ Levenshtein Distance: Number of edits (indels + substitutions) \
+/ Levenshtein Distance: Number of edits (indels + substitutions) \
 
-\ Dynamic Programming: Reduce problems into subproblems to save results and reduce repeated computations. 
+/ Dynamic Programming: Reduce problems into subproblems to save results and reduce repeated computations. 
 - Requires optimal substructure (optimal solution contains optimal solutions to subproblems)
 - Overlapping subproblems: Solution contains set of distinct subproblems repeated many times
 - No Greedy Choice: Requires tracing back through many choices
 
 == Pairwise Sequence Alignment
-\ Pairwise Sequence Alignment: Arrange two sequences so similar regions are aligned to each other.
+/ Pairwise Sequence Alignment: Arrange two sequences so similar regions are aligned to each other.
 
 #image("../assets/pairwise-sequence-alignment.png")
 
@@ -50,8 +50,8 @@ _Ex_: TGCAGT TCACAGT (Switch G to C, remove A, d= 2)
   + output alignment score at bottom right cell, and use backtrack array to derive original alignment
 ]
 
-#image("../assets/needleman-wunsch-matrix.png")
-#image("../assets/needleman-wunsch-traceback.png")
+#image("../assets/needleman-wunsch-matrix.png", width: 60%)
+#image("../assets/needleman-wunsch-traceback.png", width: 70%)
 #image("../assets/needleman-wunsch-algo.png")
 #image("../assets/needleman-wunsch-traceback-algo.png")
 
@@ -63,7 +63,7 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 *Affine*: Gap Penalty = Gap Opening + Gap Extension x (Gap Length - 1) \
 *Convex*: Gap Penalty <= Affine Gap Penalty \
 
-\ NCBI Blastn Scoring Matrix:
+/ NCBI Blastn Scoring Matrix:
 #table(
   table.header(
     [*Event*], [*Score*]
@@ -76,13 +76,12 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 )
 
 === Local Alignment
-\ Smith-Waterson: Same as *Needleman-Wunsch* but we can start and end anywhere, and the goal is to find the lowest cost path overall.
+/ Smith-Waterson: Same as *Needleman-Wunsch* but we can start and end anywhere, and the goal is to find the lowest cost path overall.
 0 is minimum, so initialize every cell as minimum of a continuation of path and 0, and the highest score is the ending of the alignment. To retrieve, we start at highest cell and go back until we reach 0. 
 
 
 === Comparison
 *Global Alignment: Needleman–Wunsch Algorithm*
-
 - *Initialization*: Top-left, i.e. $M(0,0) = 0$  
 - *Iteration*:  
   $
@@ -111,10 +110,10 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 - *Traceback*: Start from the highest-scored cell and end when $M(i,j)$ is 0.  
 
 === Database Search
-\ k-mer: Continuous block of $k$ characters (def. 11 for nucl and 3 for prot) \
-\ High-Scoring Segment Pair: Alignment found by BLAST word match
+/ k-mer: Continuous block of $k$ characters (def. 11 for nucl and 3 for prot) \
+/ High-Scoring Segment Pair: Alignment found by BLAST word match
 
-\ BLAST: 
+/ BLAST: 
 #pseudocode-list[
   + Build sequence into *k-mers* (continuous block of $k$ characters)
   + For each k-mer build index hash table of occurrences of all k-mers in target string
@@ -124,14 +123,14 @@ Because whole regions get inserted/deleted, having $n$ bases indeled is less cos
 ]
 
 ==== Variations
-\ Gapped BLAST: Extensions are in BLAST are allowed to use gaps. (So take gaps and continue aligning after the gaps)
-\ Two-hit Seeding: You can only extend a sequence if there is another sequence nearby it. 
+/ Gapped BLAST: Extensions are in BLAST are allowed to use gaps. (So take gaps and continue aligning after the gaps)
+/ Two-hit Seeding: You can only extend a sequence if there is another sequence nearby it. 
   - Finding two-length words is more likely than a full word, so it's more sensitive.
 
 ==== Scoring
-\ Raw Score: Alignment score $(S)$ of string \
-\ P value: Probability of alignment score $gt.eq S$ given random strings \
-\ E value: Expected number of alignments with score $gt.eq S$ given random strings \
+/ Raw Score: Alignment score $(S)$ of string \
+/ P value: Probability of alignment score $gt.eq S$ given random strings \
+/ E value: Expected number of alignments with score $gt.eq S$ given random strings \
 
 ==== Alignment Scoring
 - Used to compare alignments of same query-reference pair
@@ -151,8 +150,8 @@ Probability is $p^m q^s r^i$, log-prob = $m log(p) + s log(q) + i (log) r$ $m, s
   - TCAGT aligning to TCGGT is better than TCAGTTCAGT aligning to TCGGTTCGGT
 
 ===== Comparing Alignment of diff query-reference pair
-\ Homology Model: Assume alignment reflects evolution
-\ Random Model: Assume alignment spurred randomly
+/ Homology Model: Assume alignment reflects evolution
+/ Random Model: Assume alignment spurred randomly
 
 ====== Homology Model
 Probability: $Pr(x, y | H)$ \
@@ -193,7 +192,7 @@ Sequence
 ==== Alignment-Free Sequence Comparison
 Given 2 sequences, chop them up into kmers. Then create a union between these two kmer lists. Then, create a word count of each kmer into a vector of the combined kmer list. Then take Euclidean distance between the two for a score.
 
-#image("../assets/alignment-free-similarity.png")
+#image("../assets/alignment-free-similarity.png", width: 80%)
 
 ==== Open Vocabulary Problem (Byte-Pair encoding)
 To increase ability to scan sequence, take index of k-mers, sorted by frequency, and add that as a new "character". Iteratively, we reduce the number of tokens to scan.
@@ -212,7 +211,7 @@ Then combine all the sequences by determining the gaps in each sequence at which
 
 This doesn't really concern alignment between non-centre sequences.
 
-#image("../assets/center-star.png")
+#image("../assets/center-star.png", width: 90%)
 
 === Progressive Alignment
 Greedy algorithm that is a heuristic that doesn't visit all solutions but still gives good answer.
@@ -225,7 +224,7 @@ Matrix with zero on diagonal, and non-negative values, symmetric, and satisfies 
 === Aligning new sequence
 Then, if we have a new sequence to add, we gather our alignment of all the sequences, and capture the frequency of each possible character at each position for each character. Then the new "sequence" is the greatest frequency at each position, which you align to.  
 
-#image("../assets/multi-sequence-group-alignment.png")
+#image("../assets/multi-sequence-group-alignment.png", width: 90%)
 
 === Applications of MSA
 - Motif Finding: Detect conserved regions of a protein family as important motifs

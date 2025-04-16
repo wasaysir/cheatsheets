@@ -9,13 +9,14 @@
   font-size: 5.5pt,
   line-skip: 5.5pt,
   x-margin: 30pt,
-  y-margin: 30pt,
+  y-margin: 25pt,
   num-columns: 5,
   column-gutter: 4pt,
   numbered-units: false,
 )
 
 #include "units/00-general-formula.typ"
+#include "units/01-biology-basics.typ"
 #include "units/02-sequence-alignment.typ"
 #include "units/03-phylogeny.typ"
 #include "units/04-genome-mapping.typ"

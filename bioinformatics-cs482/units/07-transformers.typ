@@ -5,13 +5,13 @@ Used for predicting sequential data
 
 == Input Embedding
 
-\ Input Embedding: Input tokens are mapped to dense vector representations using an embedding layer. $W_0 in RR^(N_"dict" times d)$ $N_"dict"$: Vocabulary Size. $d$ is embedding dimensions.
+/ Input Embedding: Input tokens are mapped to dense vector representations using an embedding layer. $W_0 in RR^(N_"dict" times d)$ $N_"dict"$: Vocabulary Size. $d$ is embedding dimensions.
 
 $W_0$: Learnable lookup table, where embeddings learned iteratively.
 
 == Positional Embedding
 
-\ Positional Embedding: To encode positional data, the vector is encoded based on its position within the string into a series of sin and cosine frequencies, which is beneficial because it is normalized and restricted, allowing invariance between varying length strings, but also ensuring positional value.
+/ Positional Embedding: To encode positional data, the vector is encoded based on its position within the string into a series of sin and cosine frequencies, which is beneficial because it is normalized and restricted, allowing invariance between varying length strings, but also ensuring positional value.
 
 Positional Encoding formula: $P E_("pos", 2i) = sin("pos"/10000^(2i/d)_"model")$ and $P E_("pos", 2i + 1) = cos("pos"/10000^(2i/d)_"model")$
 

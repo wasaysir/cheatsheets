@@ -1,36 +1,36 @@
 = Phylogeny
-\ MRCA: Most Recent Common Ancestor (Root of Tree) \
-\ Internal Nodes: Ancient hypothetical species 
-\ Leaf Nodes: Extant species \
-\ Neighbour: Two species that are most closely related on tree \
-\ Clade: Group of organisms with common ancestor \
-\ Outgroup: Set of organisms that are not in the "ingroup", and are distant in the tree. \
-\ Homolog: Descendant of common ancestor \
-\ Analog: Similar but don't share ancestry \
-\ Ortholog: Speciation event, where common ancestors break into two species \
-\ Paralog: One gene breaks into two separate versions in same genome \
-\ Phylogeny: Construction of evolutionary tree by evolutionary relationship \
-\ Morphology: Construction of evolutionary tree by physical featuers \
+/ MRCA: Most Recent Common Ancestor (Root of Tree)
+/ Internal Nodes: Ancient hypothetical species 
+/ Leaf Nodes: Extant species
+/ Neighbour: Two species that are most closely related on tree
+/ Clade: Group of organisms with common ancestor
+/ Outgroup: Set of organisms that are not in the "ingroup", and are distant in the tree.
+/ Homolog: Descendant of common ancestor
+/ Analog: Similar but don't share ancestry
+/ Ortholog: Speciation event, where common ancestors break into two species
+/ Paralog: One gene breaks into two separate versions in same genome
+/ Phylogeny: Construction of evolutionary tree by evolutionary relationship
+/ Morphology: Construction of evolutionary tree by physical featuers
 
 #image("../assets/ortholog-homolog-paralog.png")
 
 3 problems: *Topology*, *Root*, *Branch Lengths*
 
-\ Cladogram: Tree where branch length has no meaning
-\ Phylogram: Tree where branch length conveys genetic change
-\ Ultrametric tree: Tree where branch length conveys time
+/ Cladogram: Tree where branch length has no meaning
+/ Phylogram: Tree where branch length conveys genetic change
+/ Ultrametric tree: Tree where branch length conveys time
 
 #image("../assets/tree-types.png")
 
-\ Hierarchical Clustering: Arrange sequences based on pairwise distance in hierarchical manner \
+/ Hierarchical Clustering: Arrange sequences based on pairwise distance in hierarchical manner \
 
-\ Well-behaved tree: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time". Also, the three-point condition is met, where for all distances, $x, y, z$, $d(x, y) lt.eq max(d(x, z), d(z, y))$ \
+/ Well-behaved tree: All nodes have equal distance from root to leaves (ultrametric), the distance is defined as "time". Also, the three-point condition is met, where for all distances, $x, y, z$, $d(x, y) lt.eq max(d(x, z), d(z, y))$ \
 
 == Distance-based methods
 === UPGMA
-\ UPGMA: Unweighted Pair Group Method with Arithmetic Mean
+/ UPGMA: Unweighted Pair Group Method with Arithmetic Mean
 
-\ Linkage Criterion: Distance metric between two groups (not just sequences, but 2 separate groups of sequences)
+/ Linkage Criterion: Distance metric between two groups (not just sequences, but 2 separate groups of sequences)
 
 #image("../assets/upgma-practice.png")
 #image("../assets/upgma-merge.png")
@@ -48,9 +48,9 @@ Ultrametric trees are represented by symmetric 0-diagonal matrices, where indice
 - For any triplet of nodes, the distances $D_(i, j), D_(j, k), D_(i, k)$ are either equal, or two are equal and the remaining one is smaller. (By 4-point theorem)
 
 === Neighbour Joining
-\ Additive Matrix: There exists an additive tree fitting the matrix \
-\ Additive Tree: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$ \
-\ Four-Point Theorem: Distance matrix is additive iff two of the sums are equal and third is less than or equal to other sums: 
+/ Additive Matrix: There exists an additive tree fitting the matrix \
+/ Additive Tree: Given symmetric $n times n$ 0-diagonal matrix, for any neighbouring leaves $i, j$, with parent $m$, the distance from $m$ to any other leaf $k$ is $d_(k, m) = (d_(i, k) + d_(j, k) - d_(j, l)) / 2$ \
+/ Four-Point Theorem: Distance matrix is additive iff two of the sums are equal and third is less than or equal to other sums: 
 #image("../assets/fourpoint.png")
 
 ==== Procedure
@@ -99,7 +99,7 @@ Thus, the expected number of substitutions per site is: $d = -3/4 ln(1 - 4/3 p)$
 === Maximum Parsimony
 Score trees based on the minimum number of substitutions required to convey the found tree. 
 
-\ Parsimony: Simplest explanation is usually best.
+/ Parsimony: Simplest explanation is usually best.
 
 *Pseudocode*:
 Given tree and alignment column $u$, label interal nodes to minimize substitutions.
@@ -118,7 +118,7 @@ To score a tree using maximum parsimony we do the following:
 
 Note that $x_k(u)$ means the u'th base pair for node $k$. Then, for internal nodes, you take the intersection as the list of possible values that wouldn't require a substitution. If there is nothing, then join them, so that you only require one substitution.
 
-#image("../assets/fitch-algorithm.png")
+#image("../assets/fitch-algorithm.png", width: 50%)
 
 Note this doesn't build a tree, but scores it.
 
@@ -143,8 +143,8 @@ $pi_x$ is stationary probability of nucleotide $X$ at the root.
 Like maximum likelihood, based on probabilities, but tree topology is not single tree, but probability distribution of all trees. Uses Bayes' theorem to calculate posterior probability of trees based on prior probability of trees and observed data. Samples from probability distribution and updates model states iteratively
 
 === Tree Space Search
-\ Stepwise Addition: Start from minimum tree (3 taxa) and add taxa, then optimize topology. 
-\ Use starting tree: A tree with all taxa but is less accurate. Either use a cheap method for construction or randomly create.
+/ Stepwise Addition: Start from minimum tree (3 taxa) and add taxa, then optimize topology. 
+/ Use starting tree: A tree with all taxa but is less accurate. Either use a cheap method for construction or randomly create.
 
 == Summary
 #table(

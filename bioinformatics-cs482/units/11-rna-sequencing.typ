@@ -1,6 +1,6 @@
 = RNA Sequencing
 
-\ Microarray Technology: Tool to determine gene expression levels by comparing expression of specific RNA sequences in cells under different treatments.
+/ Microarray Technology: Tool to determine gene expression levels by comparing expression of specific RNA sequences in cells under different treatments.
 
 Procedure:
 + The chip is a glass slide with thousands of tiny spots with DNA probes (short known sequences of specific genes)
@@ -12,7 +12,7 @@ Procedure:
 Advantages:
 + Can focus on small regions, even few molecules/cell
 
-\ RNA-Seq Technology: More advanced version of RNA sequencing that doesn't tag to known sequences, but rather sequences actual RNA sequence.
+/ RNA-Seq Technology: More advanced version of RNA sequencing that doesn't tag to known sequences, but rather sequences actual RNA sequence.
 
 Procedure:
 + Isolate mRNA
@@ -23,7 +23,7 @@ Procedure:
 + Use PCR amplification to increase precision
 + Sequence cDNA using sequencer (like Illumina) to assign quality scores to individual reads
 
-\ Expression Analysis Data Matrix:
+/ Expression Analysis Data Matrix:
 Each vector contains an expression level for each gene. These vectors are collected for each experiment/condition, and combined to form a matrix. 
 
 Each row in the matrix determines the *expression profile of a gene*. 
@@ -37,14 +37,14 @@ By *clustering* in the Expression Analysis Data Matrix, we can determine hidden 
 
 By classification, we can extract features from data that best assign elements to well-defined classes.
 
-\ Differential Gene Expression: Genes are expressed differently depending on certain conditions (conditions can be Time, Physiology, Health, Tissue, Individual, Species)
+/ Differential Gene Expression: Genes are expressed differently depending on certain conditions (conditions can be Time, Physiology, Health, Tissue, Individual, Species)
 
 === Gene Expression Estimation Challenges
 - Sequencing runs with more depth will have more reads mapping to each gene
 - Longer Genes will have more reads mapping to them
 - Normalization is necessary to do differential expression estimation
 
-\ RPKM: Reads per Kilobase Per Million
+/ RPKM: Reads per Kilobase Per Million
 
 *Procedure*:
 + Find Read Count for gene
@@ -72,7 +72,7 @@ $P$ set of considered genomic positions. $R_p$: Observed read coverage (number o
 *Quant*: This algorithm is similar to unsupervised clustering algorithms, or EM in general, where we first optimize the transcript weights, and then optimize the profile weights repeatedly until we converge. 
 
 === Statistical Analysis
-\ P-Value: Probability of obtaining result at least as extreme as the one observed, given that null hypothesis is true.
+/ P-Value: Probability of obtaining result at least as extreme as the one observed, given that null hypothesis is true.
 
 Null hypothesis $H_0$: Gene has same expression level in two groups
 
@@ -82,12 +82,12 @@ Small p-value rejects null hypothesis.
 
 Statistical analysis of genes: We cannot run hypothesis testing on each gene individually, since we'd expect around $p%$ to be wrong. Instead, we need to adjust p-values in multiple testing setting. 
 
-\ MA plot: Compare log ratio (how much gene changed between two conditions) and mean average (overall expression). Large changes given low expression ar eless significant, so MA plots reflect that uncertainty.
+/ MA plot: Compare log ratio (how much gene changed between two conditions) and mean average (overall expression). Large changes given low expression ar eless significant, so MA plots reflect that uncertainty.
 
 #image("../assets/ma-plot.png")
 
-\ Volcano Plot: Compares log ratio to p-value (statistical significance of change). Ideally you'd have a large change tied to statistically significant change. 
+/ Volcano Plot: Compares log ratio to p-value (statistical significance of change). Ideally you'd have a large change tied to statistically significant change. 
 
 #image("../assets/volcano-plot.png")
 
-\ Simpson's paradox: Trend appears in groups of data but disappears when groups are combined.  
+/ Simpson's paradox: Trend appears in groups of data but disappears when groups are combined.  

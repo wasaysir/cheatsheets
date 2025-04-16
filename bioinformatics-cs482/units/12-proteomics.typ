@@ -1,15 +1,15 @@
 = Proteomics
 
 Types of protein structure:
-\ Primary: Amino Acid Sequence
-\ Secondary: hydrogen bonding of peptide backbone (alpha helix, beta pleated sheets)
-\ Tertiary: 3D folding due to side chain interactions
-\ Quaternary: Multiple Amino Acid Chains
+/ Primary: Amino Acid Sequence
+/ Secondary: hydrogen bonding of peptide backbone (alpha helix, beta pleated sheets)
+/ Tertiary: 3D folding due to side chain interactions
+/ Quaternary: Multiple Amino Acid Chains
 
-\ Residue: Amino acid in a peptide chain
-\ Peptide: Chain of amino acids
-\ Oligopeptide: 2-20 residues
-\ Polypeptide: 20+ residues
+/ Residue: Amino acid in a peptide chain
+/ Peptide: Chain of amino acids
+/ Oligopeptide: 2-20 residues
+/ Polypeptide: 20+ residues
 
 == Main Problems
 *Identification*: Determine which proteins are present in sample (from database)
@@ -22,7 +22,7 @@ Types of protein structure:
 
 Samples are ionized and then deflected by magnetic field. Final result on detector is dependent on mass-charge. Greater mass means smaller movement, greater charge means greater movement.
 
-\ MS/MS (Tandem Mass Spectrometry): Two-stage mass spectrometry, that first separates protein by mass/charge ionization, and then fragments the proteins before running it through a mas spectrometry to analyze again. This seocnd stage is useful for understanding the composition of proteins.
+/ MS/MS (Tandem Mass Spectrometry): Two-stage mass spectrometry, that first separates protein by mass/charge ionization, and then fragments the proteins before running it through a mas spectrometry to analyze again. This seocnd stage is useful for understanding the composition of proteins.
 
 Samples are detected by mass over charge. To differentiate between same ratios, proteins typically have multiple charge states, so you can identify proteins by the relative peaks of different charge mass/charge ratios.
 

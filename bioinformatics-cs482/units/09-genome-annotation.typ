@@ -1,7 +1,7 @@
 = Genome Annotation
 
-\ Structural Annotation: Identify locations of genes in a genome (aka gene prediction)
-\ Functional Annotation: Determine functions of genes
+/ Structural Annotation: Identify locations of genes in a genome (aka gene prediction)
+/ Functional Annotation: Determine functions of genes
 
 == Gene Prediction
 Get set of genes and observe them, try to find what's common between them, and search the genome foor these patterns.
@@ -33,11 +33,11 @@ Given a set of genes, identify a pattern and search the genome for the pattern.
 - Intron Retention: As intron remains in mature mRNA, sometimes for regulatory function
 - Regulatory Factors: Controlled by cis-elements [on same molecule as regulated gene] (Splicing enhancers/silencers) and trans-acting splicing factors (SR proteins, hnRNPs)
 
-\ Spliceosome: Complex of small nuclear RNAs and proteins facilitating splicing
+/ Spliceosome: Complex of small nuclear RNAs and proteins facilitating splicing
 
-\ Gene Family: Set of genes originated from common evolutionary ancestor (Ex. Homology). To find what gene family a gene belongs to, a simple solution is BLAST, but it suffers from same shortcomings as gene prediction. 
+/ Gene Family: Set of genes originated from common evolutionary ancestor (Ex. Homology). To find what gene family a gene belongs to, a simple solution is BLAST, but it suffers from same shortcomings as gene prediction. 
 
-\ Open Reading Frame: Continous stretch of protein-encoding codons. Starts with ATG and ends with stop codon (TAA, TAG, TGA). There are 3 possible frames in a DNA strand, 6 in double-stranded. Note ORFs can be nested within a longer ORF, but they get blocked. Also we should exclude ORFs that are too short (300 bp)
+/ Open Reading Frame: Continous stretch of protein-encoding codons. Starts with ATG and ends with stop codon (TAA, TAG, TGA). There are 3 possible frames in a DNA strand, 6 in double-stranded. Note ORFs can be nested within a longer ORF, but they get blocked. Also we should exclude ORFs that are too short (300 bp)
 
 We can predict introns by looking for a pattern: GT....A..AG
 
@@ -48,7 +48,7 @@ To find a gene we look for the following:
 - AG (Intron Stop)
 - TAA/TAG/TGA (Exon Stop)
 
-\ Sequence Motifs: Short, discrete sequence patterns indicating certain biologial functions.
+/ Sequence Motifs: Short, discrete sequence patterns indicating certain biologial functions.
 
 Problems with hard-coded sequence motifs:
 - They are too short, and these short sequences can occur randomly in genome.
@@ -64,7 +64,7 @@ Gene Sequences are probabilistic:
 
 == Gene functional annotation
 Once we've identified these structures, we can perform functional annotation (assign genes to gene families)
-\ Gene families: Set of genes that originate from common evolutionary ancestor. Given observed traits, group organisms on evolutionary relationships from these traits and have gene families depend just on gene, rather than whole genome.
+/ Gene families: Set of genes that originate from common evolutionary ancestor. Given observed traits, group organisms on evolutionary relationships from these traits and have gene families depend just on gene, rather than whole genome.
 
 == Calculating Probabilistic Genome Frequency
 When encountering a motif, if it is a gene, the probability of finding a relevant motif in downstream region is higher, if not, probability is lower. We can use this approach to determine if something is a gene.
@@ -77,12 +77,12 @@ Given aligned sequences, it's easy to compute a profiling matrix:
 Then, given a sequence, calculate the likelihood of getting the sequence given it is a gene (using profiling matrix). Then calculate the likelihood given the genes aligned randomly. This is the null hypothesis. Then, comparing the two likelihoods you can determine whether it is likely to be a gene or not.
 
 Markov Model:
-\ Markov Property: System's future state is influenced by present state, not past.
+/ Markov Property: System's future state is influenced by present state, not past.
 - Given base frequencies are linked to recent context, we use a Markov model to calculate probability of getting a nucleotide given the previous $x$ nucleotides)
 
 #image("../assets/markov-calculation.png")
 
-\ Markov Chain: Sequence of events, each dependent on previous state.
+/ Markov Chain: Sequence of events, each dependent on previous state.
 
 == Simplifying Code to Gene Mask
 We want to predict whether a site is "in a gene" or "non-gene", but that is a hidden state.
@@ -109,7 +109,7 @@ For each state $l$, transition probabilities must sum to 1. Same with emission p
 *Example*:
 Given path $pi = pi_1 dots pi_n$ and emitted string $x = x_1 dots x_n$, $Pr(x, pi) = Pr(x | pi) dot Pr(pi)$ and $Pr(pi) = product^n_(i=1) Pr(pi_(i-1) arrow pi_i)$. $Pr(x|pi) = product^n_(i=1) Pr(x_i | pi_i)$, therefore $Pr(x, pi) = product^n_(i=1) "emission"_(pi_i)(x_i) dot "transition"_(pi_(i-1), pi_i)$
 
-\ Decoding Problem: Given emitted string from HMM, how do we find the hidden path that maximizes the probability.
+/ Decoding Problem: Given emitted string from HMM, how do we find the hidden path that maximizes the probability.
 
 *Viterbi Graph*:
  - Create $abs("States")$ rows

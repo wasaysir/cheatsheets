@@ -1,6 +1,6 @@
 = Clustering
 
-\ Good Clustering Principle: Every pair of points from same cluster should be closer to each other than any pair of points from different clusters.
+/ Good Clustering Principle: Every pair of points from same cluster should be closer to each other than any pair of points from different clusters.
 
 Formal definition:
 Optimization given set of data points $X$, distance metrix $d(x_i, x_j)$ and number of clusters $k$ the goal is to partition $X$ into subsets $C = {C_1, dots, C_k}$ such taht objective function $cal(L)(C)$ is optimized, so $C^* = arg min_C cal(L)(C)$
@@ -56,17 +56,23 @@ Using a deep neural network, we can learn lower-dimensional representations (the
 === Neural Information-Based Clustering
 To train discriminative model without labels, we can do this through explicit maximization of mutual information between input and discrete output probability distribution.
 
-\ Mutual Information: Measure of mutual information provided between two variables. How much you know about $X$ given $Y$ and vice versa.
+/ Mutual Information: Measure of mutual information provided between two variables. How much you know about $X$ given $Y$ and vice versa.
 
 #image("../assets/mut-info.png")
 
+#show math.equation: set block(breakable: true)
+
 $
-  M I(y, x) &= integral integral p(y, x) log (p(x, y))/(p(x) p(y)) d y d x \\
-  &= integral integral p(y | x) p(x) log (p(y | x))/(p(y)) d y d x \\
-  &= integral integral p(y | x) p(x) log p(y | x) d y d x - integral integral p(y | x) p(x) log p(y) d y d x \\
-  &= EE_(x tilde p(x)) [sum^K_(j=1) p(y_j | x) log p(y_j | x)] - EE_(x tilde p(x)) [sum^K_(j=1) p(y_j | x) log p(y_j)] \\
-  &= 1/N sum^N_(i=1) sum^K_(j=1) p(y_j | x_i) log p(y_j | x_i) - sum^K_(j=1) log p(y_i) EE_(x tilde p(x))[p(y_j)|x)] \\
-  &= 1/N sum^N_(i=1) sum^K_(j=1) p(y_j | x_i) log p(y_j | x_i) - sum^K_(j=1) log (1/N sum^N_(i=1) p(y_i | x_i)) dot 1/N sum^N_(i=1) p(y_j | x_i) \\
+  M I(y, x) &= integral integral p(y, x) log (p(x, y))/(p(x) p(y)) d y d x \
+  &= integral integral p(y | x) p(x) log (p(y | x))/(p(y)) d y d x \
+  &= integral integral p(y | x) p(x) log p(y | x) d y d x \
+  &- integral integral p(y | x) p(x) log p(y) d y d x \
+  &= EE_(x tilde p(x)) [sum^K_(j=1) p(y_j | x) log p(y_j | x)] \
+  &- EE_(x tilde p(x)) [sum^K_(j=1) p(y_j | x) log p(y_j)] \
+  &= 1/N sum^N_(i=1) sum^K_(j=1) p(y_j | x_i) log p(y_j | x_i) \
+  &- sum^K_(j=1) log p(y_i) EE_(x tilde p(x))[p(y_j)|x)] \
+  &= 1/N sum^N_(i=1) sum^K_(j=1) p(y_j | x_i) log p(y_j | x_i) \
+  &- sum^K_(j=1) log (1/N sum^N_(i=1) p(y_i | x_i)) dot 1/N sum^N_(i=1) p(y_j | x_i) \
   &= - overline(H(sigma)) + H(overline(sigma))
 $
 

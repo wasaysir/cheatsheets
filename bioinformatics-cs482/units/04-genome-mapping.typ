@@ -73,21 +73,21 @@ Note that you can turn an Eulerian path into an Eulerian cycle by adding an edge
 - Variant Calling: Detect positions varying from reference population
 - Genome Assembly: Reconstruct full chromosome from short/long sequencing reads/fragments
 
-\ Seed-and-extend: To find target regions on reference genome that are at most $k$ mutations between read and target build alignment from seed regions instead of global/local alignment.
+/ Seed-and-extend: To find target regions on reference genome that are at most $k$ mutations between read and target build alignment from seed regions instead of global/local alignment.
 
 == Indexing Data Structures
 === K-mer index
 Generate list of words of length $k$ in genome string. For each kmer build index table with all occurrences in the reference, and for each kmer of query, find its hits in the index table.
 
 === Suffix Tree
-\ Suffix: Substring $S_i$ of $s$ starting at position $i$.
+/ Suffix: Substring $S_i$ of $s$ starting at position $i$.
 
 - Start with full string $S$ and empty root.
 - Add each suffix successively and label leaf with position.
 - Use existing edges where possible.
 - Merge edges that have no branches and concatenate labels for better space efficiency.
 
-Pattern Matching: To see if query string $Q$ is substring of $S$, start at root and traverse tree according to query. \ 
+Pattern Matching: To see if query string $Q$ is substring of $S$, start at root and traverse tree according to query.
 Longest Common Substring: Build substring for concatenated string $S \# Q \$$ and label leaves depending on whether suffix belongs to $S$ or $Q$. Common substrings, as internal nodes, are prefixes of two suffixes from both $S$ and $Q$, so find node with longest path to the root.
 
 #image("../assets/suffix-tree.png")
@@ -106,10 +106,10 @@ Lossless string compression algorithm, made by generating all rotations of strin
 Note that we rotate to the left, so TAGAGA\$ becomes AGAGA\$T
 
 Three ways of inverting:
-\ Sort and add: Given Iteration $i$ sort lexicographically, then add original BWT to beginning. Continue until you reach same length as input string, and take string with \$ at the end. Each iteration takes $O(n log n)$, so total complexity is $O(n^2 log n)$
+/ Sort and add: Given Iteration $i$ sort lexicographically, then add original BWT to beginning. Continue until you reach same length as input string, and take string with \$ at the end. Each iteration takes $O(n log n)$, so total complexity is $O(n^2 log n)$
 
 ==== LF-Mapping
-\ First-last property: $k$-th occurrence of a symbol in First Column and $k$-th occurrence of symbol in Last Column correspond to the same position of this symbol in Text.
+/ First-last property: $k$-th occurrence of a symbol in First Column and $k$-th occurrence of symbol in Last Column correspond to the same position of this symbol in Text.
 
 Last column is the BWT, first column is the sorted characters of BWT. 
 
