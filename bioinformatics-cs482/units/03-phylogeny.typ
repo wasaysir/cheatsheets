@@ -106,7 +106,7 @@ Given tree and alignment column $u$, label interal nodes to minimize substitutio
 *Initialization*: Set $C = 0$ and root node $k = 2 N - 1$
 *Iteration*: If $k$ is a leaf, set $R_k = {x_k(u)}$
 If $k$ is an internal node with children $i, j$: 
-If $R_i inter R_j eq.not nothing, "set" R_k = R_i inter R_j$
+If $R_i sect R_j eq.not nothing, "set" R_k = R_i sect R_j$
 Else $R_k = R_i union R_j$ and increment $C$
 
 To score a tree using maximum parsimony we do the following:
@@ -118,7 +118,7 @@ To score a tree using maximum parsimony we do the following:
 
 Note that $x_k(u)$ means the u'th base pair for node $k$. Then, for internal nodes, you take the intersection as the list of possible values that wouldn't require a substitution. If there is nothing, then join them, so that you only require one substitution.
 
-#image("image.png")
+#image("../assets/fitch-algorithm.png")
 
 Note this doesn't build a tree, but scores it.
 
