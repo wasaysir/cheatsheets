@@ -185,3 +185,52 @@ Sometimes data is missing because of a correlated variable of interest, which is
     - Maximization: based on expected missing values, compute new estimate of $h_(M L)$
 
 Simple-version: K-means algorithm: Compute most likely k-means, then maximize based on those classifications.
+
+K-means Algorithm: Pick $k$ means in $X$, one per class, $C$. THen assign examples to $k$ classes, and re-estimate $k$ means based on assignment. Repeat until you stop changing.
+
+Expectation Maximization Motivation:
+- Approximate maximum likelihood
+- Start with guess $h_0$
+- Iteratively compute $h_(i+1) = arg max_h sum_Z P(Z | h_i, e) log P(e, Z | h)$
+- Expectation: Compute $P(Z | h_i , e)$ that fills in missing data (the unknown variables)
+- Maximization: Find new $h$ that maximizes $sum_Z P(Z | h_i, e) log P(e, Z  |h)$
+- Can show that $P(e | h_(i+1)) gt.eq P(e |h_i)$
+
+==== General Bayes Network EM
+- Complete Data: Bayes Net Maximum Likelihood
+$theta_(V = "true", "parents"(V) = v) = ("number" in e "with" (V = "true" and "parents"(V) = v))/("number" in e "with parents"(V) = v)$
+
+- Incomplete Data: Bayes Net Expectation Maximization
+Observed variables $X$ and missing variables $Z$. Start with some guess for $theta$, and then for E step compute weights for each data $x_i$ and latent variable(s) value(s) $z_j$ (using e.g. variable elimination) $w_(i j) = P(z_j | theta, x_i)$. M Step: Update parameters with $theta_(V = j, "parents"(V) = v) = (sum_i w_(i j) | V = j and "parents"(V) = v in {x_i, z_j})/(sum_(i j) w_(i j) | "parents"(V) = v in {x_i, z_j})$
+
+=== Belief Network Structure Learning
+$P("model" | "data") = (P("data" | "model") times P("model")) /(P("data"))$
+- Here a model is a belief network.
+- Bigger networks can always fit data better.
+- $P("model")$ lets us encode a preference for smaller networks (e.g. using description length)
+- You can search over network structure looking for most likely model.
+- You can do independence tests to determine which features should be the parents.
+- Just because features don't give information indivdually doesn't mean they won't give information in combination with out features.
+- It is ideal to search over total orderings of variables.
+
+== Autoencoders
+- Representation Learning algorithm that learns to map examples to lower dimensional representation
+- 2 Main components: Encoder that maps $x$ to low-dimensional $hat(z)$, Decoder that maps $hat(z)$ to original representation $x$
+- Goal is to minimize SSE of $E = sum_i (x_i - d(e(x_i)))^2$
+
+*Deep Neural Network Autoencoders*: Good for complex inputs. $e$ and $d$ are feedforward neural networks, joined in series and trained via backpropagation.
+
+=== Generative Adversarial Networks
+- Generative unsupervised learning algorithm
+- Goal is to generate unseen examples that look like training examples
+- Contain a pair of networks
+    - Generator $g(z)$, where given vector $z$ in latent space, produces example $x$ drawn from distribution taht approximates true distribution of training examples. $z$ usually sampled from Gaussian distribution
+    - Discriminator $d(x)$: A classifier that predicts whether $x$ is real or fake
+- Trained with minimax error: $E = EE_x[log(d(x))] + EE_z[log(1 - d(g(z)))]$
+- Discriminator tries to maximize $E$
+    - For $x$ from training set $d(x) arrow 1$
+    - For $x$ from generator (based on $z$), $d(x) arrow 0$
+- Generator tries to minimize $E$ (to fool $d$)
+    - For $x$ from training set, $d(x) arrow 0$
+    - For $x$ from generator (based on $z$), $d(x) arrow 1$
+- After convergence, $g$ should produce realistic outputs, and $d$ should output $1/2$ indicating maximal uncertainty.
