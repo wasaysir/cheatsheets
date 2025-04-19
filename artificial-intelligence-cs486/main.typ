@@ -28,6 +28,6 @@
 #include "units/05-supervised.typ"
 #include "units/06-reasoning-under-uncertainty.typ"
 #include "units/07-learning-with-uncertainty.typ"
-#include "units/08-neural-networks.typ"
+#include "units/08-machine-learning.typ"
 #include "units/09-planning-with-uncertainty.typ"
 #include "units/10-reinforcement-learning.typ"
