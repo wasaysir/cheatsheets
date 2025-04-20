@@ -34,5 +34,5 @@ Then $arrow(x_i)' = arrow(x_i) + P E(i)$
 
 Use encoder as layers of multi-head self-attention and fully-connected FF nets and connect to decoder with masked multi-head attention, encoder-decoder attention and fully-connected layers.
 
-#image("../assets/transformer_architecture.png")
+#image("../assets/transformer_architecture.png", width: 50%)
 

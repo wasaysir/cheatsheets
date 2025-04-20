@@ -8,8 +8,9 @@ The optimal linear decoding can be solved to be $d^* = (H^top H)^(-1) H^top X$.
 
 This can be problematic if $H^top H$ is poorly conditioned (almost singular), so instead we add noise to $H$, and get:
 $
-  norm((H+epsilon)D - T)^2_2 &= norm((H D - T) + epsilon D)^2_2 \\
-  &= (H D - T)^top (H D - T) + 2 (H D - T)^top (epsilon D) + D^top epsilon^T epsilon D
+  norm((H+epsilon)D - T)^2_2 &= norm((H D - T) + epsilon D)^2_2 \
+  &= (H D - T)^top (H D - T) + 2 (H D - T)^top (epsilon D) \
+  &+ D^top epsilon^T epsilon D
 $
 
 Since middle term is usually zero, since $epsilon$ independent of $H D - T$, then if $epsilon^top epsilon approx sigma^2 I$, then it is finally $norm(H D - T)^2_2 + sigma^2 norm(D)^2_2$

@@ -5,11 +5,11 @@ In neurons, updates can only use local information, but backpropagation updates 
 == Predictive Coding (PC)
 - Predictions are sent down the hierarchy
 - Errors are sent up the hierarchy
-#image("../assets/predictive-coding.png")
+#image("../assets/predictive-coding.png", width: 50%)
 
 In a PC-Node, there are two parts: Value/State Node and an error node.
 
-#image("../assets/predictive-coding-node.png")
+#image("../assets/predictive-coding-node.png", width: 50%)
 
 $mu^i = sigma((x^(i+1))M^i + beta^i)$, this is our prediction.
 For simplicity, assume $W^i = (M^i)^T$

@@ -1,8 +1,6 @@
 = Recurrent Neural Networks
-
 Hidden layer can encode input sequence, allowing sequential data to be outputted.
-
-\ Backprop Through Time: Unroll network through time, to create feedforward network into a DAG, and evaluate the targets in sequence similar to how you would batch inputs.
+/ Backprop Through Time: Unroll network through time, to create feedforward network into a DAG, and evaluate the targets in sequence similar to how you would batch inputs.
 
 Note: $h^i = sigma(x^i U + h^(i-1) W + b)$
 $y = sigma(h^i V + c)$

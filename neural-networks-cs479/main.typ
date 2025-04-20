@@ -6,12 +6,12 @@
   title: "Cheatsheet Title", 
   authors: "Authors",
   write-title: false,
-  font-size: 5.5pt,
+  font-size: 5pt,
   line-skip: 5.5pt,
   x-margin: 30pt,
-  y-margin: 30pt,
+  y-margin: 20pt,
   num-columns: 5,
-  column-gutter: 4pt,
+  column-gutter: 3pt,
   numbered-units: false,
 )
 
@@ -28,7 +28,6 @@
 #include "units/10-overfitting.typ"
 #include "units/11-enhancing-optimization.typ"
 #include "units/12-deep-neural-networks.typ"
-#include "units/13-visual-system.typ"
 #include "units/14-convolutional-neural-networks.typ"
 #include "units/16-batch-normalization.typ"
 #include "units/17-hopfield-networks.typ"
