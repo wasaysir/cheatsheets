@@ -12,7 +12,7 @@ $d$ is depth of shallowest goal node \
 - Successor function
 - (optional) cost
 
-\ Frontier: Ends of paths from start node that have been explored
+/ Frontier: Ends of paths from start node that have been explored
 
 == Graph Search Algorithm
 #pseudocode-list[
@@ -28,11 +28,11 @@ $d$ is depth of shallowest goal node \
 == Uninformed Search
 === Depth-first-search
 Use frontier as stack, always select last element
-\ Cycle Check: Check if current node exists within path you are Checking
-\ Space Complexity: $O(b m)$
-\ Time Complexity: $O(b^m)$
-\ Completeness: No
-\ Optimal: No
+/ Cycle Check: Check if current node exists within path you are Checking
+/ Space Complexity: $O(b m)$
+/ Time Complexity: $O(b^m)$
+/ Completeness: No
+/ Optimal: No
 
 Use:
 - Restricted space
@@ -44,11 +44,11 @@ Don't use:
 
 === Breadth-first-search
 Use frontier as queue, always select first element
-\ Multiple-Path Pruning: Check if current node has been visited by any previous path by maintaining explored set.
-\ Space Complexity: $O(b^d)$
-\ Time Complexity: $O(b^d)$
-\ Completeness: Yes
-\ Optimal: No (only finds shallowest goal node)
+/ Multiple-Path Pruning: Check if current node has been visited by any previous path by maintaining explored set.
+/ Space Complexity: $O(b^d)$
+/ Time Complexity: $O(b^d)$
+/ Completeness: Yes
+/ Optimal: No (only finds shallowest goal node)
 
 Use:
 - Space isn't restricted
@@ -60,10 +60,10 @@ Don't use:
 === Iterative-Deepening
 For every depth-limit, perform depth-first-search, this marries BFS and DFS by "doing BFS" but without space-concerns. However, we end up revisiting nodes.
 
-\ Space Complexity: $O(b d)$ 
-\ Time Complexity: $O(b^d)$, $b^d sum^d_(n=1) n (1/b)^(n-1) = b^d (b/(1-b))^2$ We visit level $i$ $d - i$ times, and level $i$ has $b^i$ nodes, so that's the sum, then extending to infinity, and use geometric series.
-\ Completeness: Yes
-\ Optimal: No (only finds shallowest goal node)
+/ Space Complexity: $O(b d)$ 
+/ Time Complexity: $O(b^d)$, $b^d sum^d_(n=1) n (1/b)^(n-1) = b^d (b/(1-b))^2$ We visit level $i$ $d - i$ times, and level $i$ has $b^i$ nodes, so that's the sum, then extending to infinity, and use geometric series.
+/ Completeness: Yes
+/ Optimal: No (only finds shallowest goal node)
 
 Use:
 - Space isn't restricted
@@ -75,10 +75,10 @@ Don't use:
 === Lowest-Cost-First-Search
 Select a path on frontier with lowest cost. Frontier is priority queue ordered by path cost.
 _Technically uninformed/blind search because it's searching randomly_
-\ Space Complexity: $O(b^d)$
-\ Time Complexity: $O(b^d)$
-\ Completeness and optimality: Yes if branching factor is finite and cost of every edge is strictly positive.
-\ Termination: Only terminate when the goal node is first on the frontier, not if it's in the frontier.
+/ Space Complexity: $O(b^d)$
+/ Time Complexity: $O(b^d)$
+/ Completeness and optimality: Yes if branching factor is finite and cost of every edge is strictly positive.
+/ Termination: Only terminate when the goal node is first on the frontier, not if it's in the frontier.
 
 === Dijkstra's
 Similar to LCFS but keep track of lowest cost to reach each node, if we find lower cost path, update that value and resort the priority queue. 
@@ -90,9 +90,9 @@ Should only use readily obtainable information and be *much* easier than solving
 
 === Greedy Best-First Search
 Select path whose end is closest to a goal based on heuristic. Frontier is a priority queue ordered by $h$.
-\ Space Complexity: $O(b^d)$
-\ Time Complexity: $O(b^d)$
-\ Completeness and optimality: Not guaranteed (could be stuck in a cycle or return sub-optimal path)
+/ Space Complexity: $O(b^d)$
+/ Time Complexity: $O(b^d)$
+/ Completeness and optimality: Not guaranteed (could be stuck in a cycle or return sub-optimal path)
 
 === Heuristic Depth-First-Search
 Do Depth-First-Search, but add paths to stack ordered according to $h$. Basically, do DFS, but sort the children by $h$ to determine who to check.
@@ -101,9 +101,9 @@ Same complexity and problems as DFS but used often.
 === A\* search
 Use both path cost and heuristic values. Frontier is sorted by $f(p) = "cost(p)" + h(p)$. Always selects node with lowest estimated distance.
 
-\ Space Complexity: $O(b^d)$
-\ Time Complexity: $O(b^d)$
-\ Completeness and optimality: Only with admissable heuristic, finite branching factor, and bounded arc-costs (there is a minimum positive arc-cost).
+/ Space Complexity: $O(b^d)$
+/ Time Complexity: $O(b^d)$
+/ Completeness and optimality: Only with admissable heuristic, finite branching factor, and bounded arc-costs (there is a minimum positive arc-cost).
 A\*  always expands the fewest nodes for all optimal algorithms and use the same heuristic. No algorithm with same info can do better. This is because if an algorithm does not expand all nodes with $f(n) < "cost"(s, g)$ they might not find the optimal solution. 
 
 === Admissable Heuristic
@@ -150,5 +150,5 @@ For one node look to maximize the heuristic, for the other node look to minimize
 - Can stop early by evaluating non-leafs via heuristics (doesn't guarantee optimal play)
 
 === Higher-level strategies
-\ Bidirectional Search: Search from backward and forward simultaneously taking $2b^(k/2)$ vs $b^k$ and try to find where frontiers match
-\ Island-driven Search: Find set of islands between $s$ and $g$ as mini problems. With $m$ islands, you get $m b^(k/m)$ vs $b^k$ but it's harder to guarantee optimality.
+/ Bidirectional Search: Search from backward and forward simultaneously taking $2b^(k/2)$ vs $b^k$ and try to find where frontiers match
+/ Island-driven Search: Find set of islands between $s$ and $g$ as mini problems. With $m$ islands, you get $m b^(k/m)$ vs $b^k$ but it's harder to guarantee optimality.

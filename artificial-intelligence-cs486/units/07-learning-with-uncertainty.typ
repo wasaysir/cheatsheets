@@ -1,16 +1,16 @@
 = Probabilistic Learning
 
-\ Bayes Rule: $P(m | E) = (P(E | m) times P(m))/P(E)$
+/ Bayes Rule: $P(m | E) = (P(E | m) times P(m))/P(E)$
 
-\ Prior Probability: Agent's beliefs before any observations. $P(h)$
-\ Posterior Probability: Updated beliefs after observing. $P(h | e)$
+/ Prior Probability: Agent's beliefs before any observations. $P(h)$
+/ Posterior Probability: Updated beliefs after observing. $P(h | e)$
 
-\ Bayesian Probability: View of probability as measure of belief (Epistimological-Pertain to knowledge)
-\ Frequentist Probability: Probability is dependent on observations (Ontological - How world is)
+/ Bayesian Probability: View of probability as measure of belief (Epistimological-Pertain to knowledge)
+/ Frequentist Probability: Probability is dependent on observations (Ontological - How world is)
 
-\ Joint Probability: P(X, Y) is probability X and Y are both true
+/ Joint Probability: P(X, Y) is probability X and Y are both true
 
-\ Proposition: Assignment of value to a variable
+/ Proposition: Assignment of value to a variable
 
 Axioms of Probability:
 - $P(x) > 0$
@@ -21,17 +21,17 @@ Axioms of Probability:
 
 $P(h | e) = P(h | e = "True") = P(h and e)/P(e)$
 
-\ Chain Rule: $P(a_1 and a_2 and dots and a_n) = P(a_n | a_(n-1) and dots and a_1) times dots times P(a_2 | a_1) times P(a_1)$
+/ Chain Rule: $P(a_1 and a_2 and dots and a_n) = P(a_n | a_(n-1) and dots and a_1) times dots times P(a_2 | a_1) times P(a_1)$
 
-\ Marginal Distribution: Given Joint distribution, marginalize out some of the variables to isolate for a subset. 
+/ Marginal Distribution: Given Joint distribution, marginalize out some of the variables to isolate for a subset. 
 
 $P(Y=y) = sum_x P(X = x, Y = y)$
 
-\ Independence: $P(X, Y) = P(X)P(Y), P(X) = P(X|Y)$
-\ Conditional Independence: $P(X, Y | Z) = P(X|Z)P(Y|Z), P(X|Z) = P(X|Y, Z)$
+/ Independence: $P(X, Y) = P(X)P(Y), P(X) = P(X|Y)$
+/ Conditional Independence: $P(X, Y | Z) = P(X|Z)P(Y|Z), P(X|Z) = P(X|Y, Z)$
 
-\ Expected Value: $EE(X) = sum_(v in "domain"(X)) V(X) P(X)$
-\ Bayesian Decision Making: $max_"decision" EE(V("decision")) = max_"decision" sum_"outcome" P("outcome" | "decision") V("decision")$
+/ Expected Value: $EE(X) = sum_(v in "domain"(X)) V(X) P(X)$
+/ Bayesian Decision Making: $max_"decision" EE(V("decision")) = max_"decision" sum_"outcome" P("outcome" | "decision") V("decision")$
 
 Complete independence means we can represent a probability distribution by the distributions over each individual variable instead of joint connections, reducing space and calculation complexity from $O(2^n)$ to $O(n)$
 
@@ -41,7 +41,7 @@ _Bayesian networks don't imply causality, just correlation. Having causality mak
 
 We can say $A$ is independent of $B$ given $C$ if learning $C$ makes $B$ irrelevant information. However, without $C$, it's possible learning $B$ is valuable.
 
-\ Conditional Probability Table: Stores probability distribution on $X$ given parents. $P(X_i | "parents"(X_i))$ for each $X_i$
+/ Conditional Probability Table: Stores probability distribution on $X$ given parents. $P(X_i | "parents"(X_i))$ for each $X_i$
 
 #image("../assets/conditional_probability_table.png")
 
@@ -56,10 +56,10 @@ Bayes' Theorem allows you to determine evidential reasoning from causal knowledg
 
 Forward Inference Rules:
 
-\ Marginalization: $P(B) = sum_(m, c) P(M = m, C = c, B)$
-\ Chain Rule: $P(B) = sum_(m, c) P(B | M, c) P(m | c) P(c)$
-\ Independence: $P(B) = sum_(m, c) P(B | m, c) P(m) P(c)$
-\ Distribution of product over sum: $P(B) = sum_m P(m) sum_c P(c) P(B | m, c)$ 
+/ Marginalization: $P(B) = sum_(m, c) P(M = m, C = c, B)$
+/ Chain Rule: $P(B) = sum_(m, c) P(B | M, c) P(m | c) P(c)$
+/ Independence: $P(B) = sum_(m, c) P(B | m, c) P(m) P(c)$
+/ Distribution of product over sum: $P(B) = sum_m P(m) sum_c P(c) P(B | m, c)$ 
 
 Backward Inference Rules:
 When evidence is downstream of query, we reason "backwards", using Bayes' rule.
@@ -69,12 +69,12 @@ When evidence is downstream of query, we reason "backwards", using Bayes' rule.
 Generalization that applies sum-out rule repeatedly to determine conditional probabilities.
 
 === Factors
-\ Factor: Representation of a function from tuple of random variables into a number. 
-\ Restricting a factor: Assigning some or all of the variables of a factor.
+/ Factor: Representation of a function from tuple of random variables into a number. 
+/ Restricting a factor: Assigning some or all of the variables of a factor.
 
-\ Product of Factor: $f_1(X, Y)$ and $f_2(X, Y)$ where $Y$ are the common variables is factor $(f_1 times f_2)(X, Y, Z) = f_1(X, Y)f_2(Y, Z)$
+/ Product of Factor: $f_1(X, Y)$ and $f_2(X, Y)$ where $Y$ are the common variables is factor $(f_1 times f_2)(X, Y, Z) = f_1(X, Y)f_2(Y, Z)$
 
-\ Sum out: $X_1$ with domain ${v_1, dots, v_k}$ from factor $f(X_1, dots, X_j)$ resulting in factor on $X_2, dots, X_j$ as $sum_(X_1)f (X_2, dots, x_j) = f(X_1 = v_1, dots, X_j) + dots + f(X_1=v_k, dots, X_j)$
+/ Sum out: $X_1$ with domain ${v_1, dots, v_k}$ from factor $f(X_1, dots, X_j)$ resulting in factor on $X_2, dots, X_j$ as $sum_(X_1)f (X_2, dots, x_j) = f(X_1 = v_1, dots, X_j) + dots + f(X_1=v_k, dots, X_j)$
 
 === Evidence
 To find posterior probability of $Z$ given evidence $Y_1 = v_1 and dots and Y_j = v_j$
@@ -118,7 +118,7 @@ Then create an explicit representation of rightmost factor $sum_Z_j f_(i+1) time
 - Represented by Markov Chain
 - Chain length represents amount of time you want to model
 
-\ Markov Assumption: $P(S_(t+1)|S_1, dots, S_t) = P(S_(t+1)|S_t)$
+/ Markov Assumption: $P(S_(t+1)|S_1, dots, S_t) = P(S_(t+1)|S_t)$
 
 === Hidden Markov Models
 
@@ -134,7 +134,7 @@ Through sensor fusion, Bayesian probabilities ensures that evidence is integrate
 
 === Stochastic Simulation
 
-\ Monte Carlo Simulation: Stochastic sampling from distribution to estimate probabilities.
+/ Monte Carlo Simulation: Stochastic sampling from distribution to estimate probabilities.
 
 To generate samples from a distribution, totally order values of domain of $X$, generate PCF, select value in range $[0, 1]$, select $x$ such that $f(x) = y$
 
