@@ -9,7 +9,7 @@ In neurons, updates can only use local information, but backpropagation updates 
 
 In a PC-Node, there are two parts: Value/State Node and an error node.
 
-#image("../assets/predictive-coding-node.png", width: 50%)
+#image("../assets/predictive-coding-node.png", width: 80%)
 
 $mu^i = sigma((x^(i+1))M^i + beta^i)$, this is our prediction.
 For simplicity, assume $W^i = (M^i)^T$

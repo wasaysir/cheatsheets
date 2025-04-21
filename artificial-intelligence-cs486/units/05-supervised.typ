@@ -1,6 +1,6 @@
 #import "@preview/lovelace:0.3.0": *
 
-= Learning
+= Supervised Learning
 / Learning: Ability to improve behaviour based on experience. Either improve range (more abilities), accuracy, or speed.
 
 *Components of learning problem*:
@@ -74,7 +74,7 @@ $accent(Y, hat)(e)$ is predicted value of feature $Y$ for example $e$ from the a
 
 / Basic Models: Decision Trees, Linear classifiers (Generalize to Neural Networks), Bayesian Classifiers
 
-= Decision Trees
+== Decision Trees
 - Representation: Decision tree
 - Bias: Tendency towards a simple decision tree
 / Nodes: Input attributes/features
@@ -142,10 +142,14 @@ So after splitting $E$ into $E_1$ and $E_2$ with size $N_1, N_2$ based on input 
 
 Note:
 $
-  N_1/N I(E_1) + N_2/N I(E_2) &= -N_1/N (sum_(y in Y)P(y | x = 1)log P(y | x = 1)) - N_2/N (sum_(y in Y)P(y | x = 2)log P(y | x = 2)) \
-  &= -sum_(y in Y)P(x=1) P(y | x = 1)log P(y | x = 1) - sum_(y in Y)P(x=2)P(y | x = 2)log P(y | x = 2) \
+  &N_1/N I(E_1) + N_2/N I(E_2) \
+  &= -N_1/N (sum_(y in Y)P(y | x = 1)log P(y | x = 1)) \
+  &- N_2/N (sum_(y in Y)P(y | x = 2)log P(y | x = 2)) \
+  &= -sum_(y in Y)P(x=1) P(y | x = 1)log P(y | x = 1) \
+  &- sum_(y in Y)P(x=2)P(y | x = 2)log P(y | x = 2) \
   &= -sum_(x in X, y in Y)P(x=x) P(y | x = x)log P(y | x = x) \
-  &= -sum_(x in X, y in Y)P(x, y)log P(x, y)/P(x) &"By definition of P(y | x)"\
+  &= -sum_(x in X, y in Y)P(x, y)log P(x, y)/P(x) \
+  &"By definition of P(y | x)"\
 $
 
 *Final Return Value*:
