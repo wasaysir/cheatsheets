@@ -6,7 +6,7 @@ Premise is we have multiple hypotheses without knowing which is correct; we assu
 Suppose $X$ is input features, and $Y$ is target feature, $d = {x_1, y_1, dots, x_N, y_N}$ as evidence and we want to know, summing over all models, $m in M$:
 $P(Y | x, d) = sum_(m in M) P(Y, m | x, d) = sum_(m in M) P(Y | m, x) P(m | d)$
 
-\ Bayesian Learning: Given prior $P(H)$, likelihood $P(d | H)$ and evidence $d$, then $P(H | d) prop P(d | H) P(H)$
+/ Bayesian Learning: Given prior $P(H)$, likelihood $P(d | H)$ and evidence $d$, then $P(H | d) prop P(d | H) P(H)$
 
 To predict $X$, we use $P(X | d) = sum_i P(X | d, h_i)P(h_i | D) = sum_i P(X|h_i)P(h_i | d)$ where predictions are weighted averages of predictions of individual hypotheses.
 
@@ -38,22 +38,22 @@ Maximum Likelihood Properties:
 
 == Binomial Distribution
 $binom(n+k, k) theta^n (1-theta)^k$
-\ Beta distribution: $B(theta; a, b) prop theta^(a-1) (1-theta)^(b-1)$
+/ Beta distribution: $B(theta; a, b) prop theta^(a-1) (1-theta)^(b-1)$
 
 == Bayesian Classifier
 If you knew classifier you could predict values of features
 $P("Class" | X_1, dots, X_n) prop P(X_1, dots, X_n | "Class") P("Class")$
 
-\ Naive Bayesian Classifier: $X_i$ are independent of each other given class, requires $P("Class")$ and $P(X_i | "Class")$ for each $X_i$, so $P("Class"|X_1, dots, X_n) prop product_i P(X_i | "Class") P("Class")$
+/ Naive Bayesian Classifier: $X_i$ are independent of each other given class, requires $P("Class")$ and $P(X_i | "Class")$ for each $X_i$, so $P("Class"|X_1, dots, X_n) prop product_i P(X_i | "Class") P("Class")$
 
 === Laplace Correction
 If feature never occurs in training set, but it does in test set, Maximum Likelihood may assign zero probability to high likelihood class. The solution is to add 1 to numerator, and add $d$ (arity of variable) to denominator, like a pseudocount.
 
-\ Bayesian Network Parameter Learning: For fully observed data, set $theta_(V, p a(V) = v)$ to relative frequency of values of $V$ given values $v$ of parents of $V$, where these theta values are the parameters, and essentially calculates probability of value $v$ set to $v_i$ given the set values of the parents of $v$
+/ Bayesian Network Parameter Learning: For fully observed data, set $theta_(V, p a(V) = v)$ to relative frequency of values of $V$ given values $v$ of parents of $V$, where these theta values are the parameters, and essentially calculates probability of value $v$ set to $v_i$ given the set values of the parents of $v$
 
-\ Occam's Razor: Simplicity is encouraged in likelihood function; a more complex, high bias function is less preferred, since low-bias can explain more datasets, but with lower probability (higher variance)
+/ Occam's Razor: Simplicity is encouraged in likelihood function; a more complex, high bias function is less preferred, since low-bias can explain more datasets, but with lower probability (higher variance)
 
-\ Bias-Variance Tradeoff: Simple models have high bias, but low variance. Complex models have low bias, but high variance.
+/ Bias-Variance Tradeoff: Simple models have high bias, but low variance. Complex models have low bias, but high variance.
 
 == Neural Networks
 
@@ -72,15 +72,15 @@ Deriving Weights:
     - Using gradient descent for $w_i arrow.l w_i - mu (partial "Error")/(partial w_i)$
     - For SSE, update rule is $w_i arrow.l w_i + mu sum_(e in E)(Y(e) - sum^n_(i=0) w_i X_i (e)) X_i (e)$
 
-\ Stochastic Gradient Descent: Examples are chosen randomly
-\ Batched Gradient Descent: Process batch of size $n$ before updating weights. (If $n$ is all data, that's gradient descent, if $n=1$ that's incremental gradient descent)
-\ Incremental Gradient Descent: Weight udpates are done immediately after example, but it might "undo" work of other weight updates, creating an oscillation
+/ Stochastic Gradient Descent: Examples are chosen randomly
+/ Batched Gradient Descent: Process batch of size $n$ before updating weights. (If $n$ is all data, that's gradient descent, if $n=1$ that's incremental gradient descent)
+/ Incremental Gradient Descent: Weight udpates are done immediately after example, but it might "undo" work of other weight updates, creating an oscillation
 
 === Linear Classifier
-\ Squashed Linear function: $hat(Y)_(arrow(w))(e) = f(sum^n_(i=0) w_i X_i (e))$, $f$ is activation function.
+/ Squashed Linear function: $hat(Y)_(arrow(w))(e) = f(sum^n_(i=0) w_i X_i (e))$, $f$ is activation function.
 Generally, if activation function is differentiable, you can use gradient descent to update weights.
 
-\ Sigmoid: $f(x) = 1/(1 + e^(-x))$ and $f'(x) = f(x)(1-f(x))$
+/ Sigmoid: $f(x) = 1/(1 + e^(-x))$ and $f'(x) = f(x)(1-f(x))$
 
 === Neural Networks
 - Can learn same things decision tree can
@@ -104,8 +104,8 @@ Common Activation Functions:
 - Leaky ReLU: $f(x) = max(0, x) + k dot min(0, x)$
     - Small positive slope $k$ in negative area, enabling learning for negative input values.
 
-\ Feedforward Network: Directed acyclic graph with single direction connections; (Function of inputs)
-\ Recurrent Network: Feeds outputs into inputs; Can have short-term memory.
+/ Feedforward Network: Directed acyclic graph with single direction connections; (Function of inputs)
+/ Recurrent Network: Feeds outputs into inputs; Can have short-term memory.
 
 === Backpropagation
 $gradient_(z^((l+1))) E = (partial E)/(partial z^((l+1)))$
@@ -126,10 +126,10 @@ $gradient_(W^((l))) E = [h^((l))]^T gradient_(z^((l+1))) E$
 We can generalize this process to take a batch of samples by letting $x$ be a matrix of samples instead of just one sample. Then, note $gradient_(z^((l))) E$ is a matrix with same dimension as $z^((l))$ as desired. Further, note that $gradient_(W^((l))) E$ is a gradient vector that sums the weight gradient matrix from each sample.
 
 === Improving Optimization
-\ Momentum: Weight changes accumulate over iterations
-\ RMS-Prop: Rolling average of square of gradient
-\ Adam: Combination of Momentum and RMS-Prop
-\ Initialization: Randomly set parameters to start
+/ Momentum: Weight changes accumulate over iterations
+/ RMS-Prop: Rolling average of square of gradient
+/ Adam: Combination of Momentum and RMS-Prop
+/ Initialization: Randomly set parameters to start
 
 === Improving Generalization: Regularization
 - Parameter Norm Penalties added to loss function
@@ -172,7 +172,7 @@ $theta_(V="true", "parents"(V) = v) = P(V = "true" | "parents"(V) = v)$
 
 ML learning of $theta$ is $theta_(V="true", "parents"(V) = v) = ("number with " (V = "true" and "parents"(V) = v))/("number with parents"(V) = v)$
 
-\ Direct maximum likelihood: $h_(M L) = arg max[sum_Z P(e, Z | h)] = dots = arg max_h[log_sum_Z pi^n_(i=1) P(X_i | "parents"(X_i), h)_(E = e)]$
+/ Direct maximum likelihood: $h_(M L) = arg max[sum_Z P(e, Z | h)] = dots = arg max_h[log_sum_Z pi^n_(i=1) P(X_i | "parents"(X_i), h)_(E = e)]$
 
 === Missing Data
 You can't ingore missing data unless you know it is missing at random. (If it is, then you can ignore hidden variables, or data with missing variables, but not with true latent variables that are always missing)
