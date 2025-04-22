@@ -1,10 +1,10 @@
 = Diffusion Models
 
-Generative model that uses noise as seeds for generating new images, by training on a model that adds noise to samples so it can then reverse the process.
+Generative model using noise as seeds for making new images, by training on a model that adds noise to samples so it can then reverse the process.
 
 #image("../assets/diffusion_direction.png")
 
-Forward process is defined as $q(x_t | x_(t-1)) = cal(N)(x_t; sqrt(1 - beta_t)x_(t-1), beta_t I)$. Final state is pure noise ($x_T tilde cal(N)(0, I)$). The variance schedule $beta_1, dots, beta_T$ is a hyperparameters controlling onise addition. Usually starts small, gets larger.
+Forward process: $q(x_t | x_(t-1)) = cal(N)(x_t; sqrt(1 - beta_t)x_(t-1), beta_t I)$. Final state is pure noise ($x_T tilde cal(N)(0, I)$). The variance schedule $beta_1, dots, beta_T$ are hyperparameters controlling noise addition. Usually starts small, gets larger.
 
 If we unwrap $x_t$ recursively, we get $x_t = sqrt(overline(alpha_t))x_0 + sum_i c_i epsilon_i$ where $a_t equiv 1 - beta_t$, $overline(alpha_t) equiv alpha_1 dots alpha_t$ and $epsilon_i tilde cal(N)(0, I)$. Since sum of gaussians is gaussion, then $x_t = sqrt(overline(alpha_t))x_0 + sqrt(1 - overline(alpha_t)) epsilon$.
 

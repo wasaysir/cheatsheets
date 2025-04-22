@@ -1,6 +1,6 @@
 = Generative Adversarial Networks
 
-Two networks: Generative Network (produce lookalike data) and Discriminative Network (identify fake data)
+Two networks: Generative Network and Discriminative Network
 
 $D(x; theta)$ - Probability $x$ is real. $G(z; phi)$ - Create input sample from random noise $z$ drawn from $p_z$ distribution.
 

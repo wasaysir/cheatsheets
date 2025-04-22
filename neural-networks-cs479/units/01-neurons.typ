@@ -46,13 +46,4 @@ Explicit Model: $v(t) = v_(i n)(1 - e^(- t/tau))$
 *Tuning Curve*: Graph showing how neuron reacts to different input currents.
 
 == Activation Functions (Sigmoidal)
-Logistic Curve: $1 / (1 + e^(-z))$
-Arctan: $arctan(z)$
-Hyperbolic Tangent: $tanh(z)$
-Threshold: $0 "if" z lt 0; 1 "if" z gt.eq 0$
-Rectified Linear Unit: $max(0, z)$
-Softplus: $log(1 + e^z)$
-
-=== Multi-Neuron Activation Functions
-SoftMax: $exp(z_i)/(sum_j exp(z_j))$ Converts elements to probability distribution (sum to 1) and normalizes values
-ArgMax: Largest element remains nonzero, everything else $0$
+Logistic Curve: $1 / (1 + e^(-z))$, $arctan(h)$, $tanh(z)$, threshold, ReLU, Softplus: $log(1 + e^z)$, SoftMax: $exp(z_i)/(sum_j exp(z_j))$, ArgMax

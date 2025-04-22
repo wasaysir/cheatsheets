@@ -7,12 +7,10 @@ $x$ is input, $z$ is latent space, so encode $p(z)$. Decoding is $d(z, theta)$. 
 #box(
   image("../assets/vae_distribution.png", width: 50%)
 )
-
 Assume $p(x | z)$ is Gaussian (for simplicity), then NLL is $-ln p_theta(x | z) = 1/(2 Sigma^2) norm(X - d(z, theta))^2 + C$ which is what we want to maximize. Our goal is $min_theta EE_(z tilde p(z)) [norm(X - d(z, theta))^2]$, and $EE_(p(z))[p_theta(x | z)] = integral p_theta(x | z) p(z) d z$. But we don't know how to sample $p(z)$, so we assume a distribution $q(z)$ to approximate value. 
 
-$p(x) &= EE_(z tilde p)[p(x | z)] \
-&= sum_(z tilde p) p(x | z) p(z) \
-&= sum_(z tilde q) p(x | z) (p(z))/(q(z)) q(z) \
+$p(x) &= EE_(z tilde p)[p(x | z)] &= sum_(z tilde p) p(x | z) p(z) \
+&= sum_(z tilde q) p(x | z) (p(z))/(q(z)) q(z)
 &= EE_(z tilde q)[p(x | z) ((p(z))/q(z))]
 $
 

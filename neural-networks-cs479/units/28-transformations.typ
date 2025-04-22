@@ -1,7 +1,3 @@
 = Transformations
 
-We use population coding to pass data between populations of neurons. To do this, we need some way to pass hidden activations between the other.
-
-Naive: Decode activations to data space, then re-encode for second population. Alternative is to bypass data space by multiplying decoder weights by encoder weights directly. $W = D_(x y) E_B in RR^(N times M)$. This i rank-1 matrix since $D_(x y) in RR^(N times 1)$ and $E_B in RR^(1 times M)$. 
-
-It's better to use separate decoder-encoder because it's computationally efficient, since it's low-rank. Calculating $A D$ takes $O(N)$ time. $(A D) E$ takes $O(M)$ time, so total time is $O(N + M)$, whereas tied weights would take $O(N M)$
+Population coding can pass data between neuron populations by transforming hidden activations. Naive: Decode to data space and then re-encode. Better: Bypass data space by multiplying decoder and encoder weights directly, resulting in  rank-1 matrix. $W = D_(x y) E_B in RR^(N times M)$ $D_(x y) in RR^(N times 1)$ and $E_B in RR^(1 times M)$. Using separate decoder-encoder matrices is computationally efficient. Total Time $O(N+M)$ for calculating $A D$ and $(A D)E$ unlike tied weights taking $O(N M)$

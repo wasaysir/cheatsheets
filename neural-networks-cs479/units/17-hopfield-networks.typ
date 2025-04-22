@@ -2,8 +2,9 @@
 / Content-Addressable Memory: System that can take part of a pattern and fill in the most likely matches from memory.
 / Hopfield Network: Given a network of $N$ neurons, each connected to all others, and given a set of $M$ possible targets, we want the network to converge to the nearest of this set.
 
-#image("../assets/hopfieldNetwork.png", width: 30%)
-
+#box(
+  image("../assets/hopfieldNetwork.png", width: 30%)
+)
 Each $x_i$ is assigned: $-1 "if" accent(x, arrow)W + b_i < 0$ and $1 "if" accent(x, W)W + b_i gt.eq$
 
 Since the graph has cycles, backpropagation won't work. Instead we need to utilize the Hopfield Energy:

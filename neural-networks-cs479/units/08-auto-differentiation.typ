@@ -14,16 +14,10 @@ Use chain rule with parent operation Op.grad to get current grad. Ex: If y is pa
 Also add wherever multiple branches converge, as is normal in derivatives calculation.
 
 Backward method:
-```py
-class Var:
-  def backward(s):
-    self.grad += s
-    self.creator.backward(s)
+```
+Var.backwards: self.grad += s; self.creator.backward(s)
 
-class Op:
-  def backward(s):
-    for x in self.args:
-      x.backward(s * partialDeriv(Op, x))
+Op.backward(s): for x in self.args: x.backward(s * partialDeriv(Op, x))
 ```
 
 In Var, self.val, self.grad, s must have same shape. 

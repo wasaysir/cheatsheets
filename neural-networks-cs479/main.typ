@@ -7,11 +7,11 @@
   authors: "Authors",
   write-title: false,
   font-size: 5pt,
-  line-skip: 5.5pt,
-  x-margin: 30pt,
+  line-skip: 5pt,
+  x-margin: 20pt,
   y-margin: 20pt,
   num-columns: 5,
-  column-gutter: 3pt,
+  column-gutter: 2.5pt,
   numbered-units: false,
 )
 
