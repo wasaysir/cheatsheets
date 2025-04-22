@@ -1,8 +1,10 @@
 = General Formula
 / Frobenius/L2 Norm: $norm(theta)_F = sqrt(sum_j theta_j^2)$ \
 / L1 Norm: $sum_i abs(theta_i)$ \
+
 #grid(
   columns: 2,
+  rows:(8pt, 8pt, 8pt, 8pt, 8pt),
   [$(d)/(d x)(x^n) = n x^(n-1)$],
   [$d)/(d x)(f(x)g(x)) = f(x)g'(x) + f'(x)g(x)$],
   [$(d)/(d x)(f(g(x)) = f'(g(x))g'(x)$],

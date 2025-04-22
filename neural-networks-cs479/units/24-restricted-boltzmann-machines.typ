@@ -33,9 +33,8 @@ Let loss be $L = - ln q_theta(V)$ for given $V$, or $L = - ln(1/Z sum_h e^(-E_th
 == Gradient of $L_1$
 - To optimize parameter, we need to compute gradient of loss function:
 $
-gradient_theta L_1 &= - gradient_theta (sum_h e^(-E_theta(V, h)))/(sum_h e^(-E_theta(V, h))) \
-&= (sum_h e^(-E_theta(V, h)) gradient_theta E_theta(V, h))/(sum_h e^(-E_theta(V, h))) \
-&= sum_h (e^(-E_theta(V, h)))/(sum_h e^(- E_theta(V, h))) gradient_theta E_theta (V, h) \
+gradient_theta L_1 &= - gradient_theta (sum_h e^(-E_theta(V, h)))/(sum_h e^(-E_theta(V, h)))
+&= sum_h (e^(-E_theta(V, h)))/(sum_h e^(- E_theta(V, h))) gradient_theta E_theta (V, h)
 $
 
 Then, since the fraction above is equivalent to $q_theta(h | V)$, we write $gradient_theta L_1 = sum_h q_theta(h | V) gradient_theta E_theta(V, h) = EE_(q(h | V))[gradient_theta E_theta(V, h)]$
@@ -47,8 +46,6 @@ $
   &= - EE_(q(v, h))[gradient_theta E_theta(v, h)]
 $
 
-Thus $gradient_theta L = gradient_theta L_1 + gradient_theta L_2  = EE_q(h|V)[gradient_theta E_theta] - EE_(q(v, h))[gradient_theta E_theta]$
-
 == Gradient for $W_(i j)$
 $gradient_(W_(i j)) E(V, h) = - V_i h_j$ and $gradient_(W_(i j)) E(v, h) = - v_i h_j$ and thus $gradient_(W_(i j))L = - EE_(q(h | V))[V_i h_j] + EE_(q(v, h))[v_i, h_j]$. First term represents expected value under posterior distribution, and second term under joint distribution
 
@@ -59,9 +56,11 @@ Step 2: Compute expectation using Gibbs sampling. $angle.l v_i h_j angle.r_(q(v,
 
 Procedure for training: Given $V$ calculate $h$, then given new $h$ calculate $v$, and from new $v$ calculate second $h$. 
 
-Weight update rule is: $W arrow W - eta(gradient_W L_1 + gradient_W L_2) = W + eta V^top sigma(V W + c) - eta v^top sigma(v W + c)$ where $eta$ is learning rate. First term relates to positive phase (step 1) and second term to negative step (step 2).
+Weight update rule is: $W arrow.l W - eta(gradient_W L_1 + gradient_W L_2)$ where $eta$ is learning rate.
 
 == Sampling
-After training, we can use it as generative model to generate new $M$ data points $V^((1)), V^((2)), dots V^((M))$ by performing Gibbs sampling from the conditional probabilities $P(v|h)$ as illustrated below: 
+#box(
+  image("../assets/generator-boltzmann.png", width: 50%)
+)
+After training, we can generate new $M$ data points $V^((1)), V^((2)), dots V^((M))$ by performing Gibbs sampling from the conditional probabilities $P(v|h)$ as illustrated below: 
 
-#image("../assets/generator-boltzmann.png")
