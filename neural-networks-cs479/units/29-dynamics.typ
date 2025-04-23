@@ -14,9 +14,11 @@ If $tau_m lt.double tau_s$ then Activity function reaches equilibrium value, whi
 #box(
   image("../assets/integrating_dynamics.png", width: 50%)
 )
+
 If we're integrating the input, then $tau_s (d s)/(d t) = -s + sigma(s) W + beta + C$ a recurrent network. Then, $(d s) / (d t) = (-s + v W + beta)/(tau_s) + tilde(tau)$ where $tilde(C) = x E$ because it is the re-integrated input, and isn't dependent on time constant. 
 
 #box(
   image("../assets/general_dynamic_system.png", width:50%)
 )
+
 Since we have multiple different forms of the dynamic system, we can generalize to $(d y)/(d t) = f(y)$

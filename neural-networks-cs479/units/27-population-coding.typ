@@ -15,4 +15,4 @@ $
 
 Since middle term is usually zero, since $epsilon$ independent of $H D - T$, then if $epsilon^top epsilon approx sigma^2 I$, then it is finally $norm(H D - T)^2_2 + sigma^2 norm(D)^2_2$
 
-We can also expand population coding to reconstruct vectors. We solve the matrix $D^* = arg min_D (norm H D - T)^2_F$ (frobenius norm) and $T$ is a matrix where each row corresponds to a horizontal sample vector input. 
+We can also expand population coding to reconstruct vectors. We solve the matrix $D^* = arg min_D (norm H D - T)^2_F$ and $T$ is a matrix where each row corresponds to a horizontal sample vector input. 
