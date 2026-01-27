@@ -11,7 +11,7 @@ Robust Loss: $cal(R)_("rob")(f) = EE_(X, T)["card"{X' in Beta(X, epsilon) | f(X'
 
 Differentiable Training Loss: $cal(R)_"learning" = min_f EE_((X, T))[g(f(X))T]$ where $g$ is smooth function.
 
-Robust model optimizes over $min_f EE_((X, T))[g(f(X)T) + max_(X' in Beta(X, epsilon)) g(f(X)f(X'))]$
+Robust model optimizes over $min_f EE_((X, T))[g(f(X)T) + max_(X' in Beta(X, epsilon)) g(f(X)f(X'))]$. \ 
 Term 1 ensures proper classification. Term 2 adds penalty for attacks.
 
 Procedure:

@@ -55,5 +55,6 @@ Weight update rule is: $W arrow.l W - eta(gradient_W L_1 + gradient_W L_2)$ wher
 #box(
   image("../assets/generator-boltzmann.png", width: 50%)
 )
+
 After training, we can generate new $M$ data points $V^((1)), V^((2)), dots V^((M))$ by performing Gibbs sampling from the conditional probabilities $P(v|h)$ as illustrated. 
 

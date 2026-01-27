@@ -43,3 +43,5 @@
 #include "units/30-biological-backprop.typ"
 #include "units/31-generative-adversarial-networks.typ"
 #include "units/32-transformers.typ"
+
+#image("assets/spike.png", width: 50%)

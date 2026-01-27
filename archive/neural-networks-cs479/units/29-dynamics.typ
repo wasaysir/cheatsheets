@@ -15,7 +15,13 @@ If $tau_m lt.double tau_s$ then Activity function reaches equilibrium value, whi
   image("../assets/integrating_dynamics.png", width: 50%)
 )
 
-If we're integrating the input, then $tau_s (d s)/(d t) = -s + sigma(s) W + beta + C$ a recurrent network. Then, $(d s) / (d t) = (-s + v W + beta)/(tau_s) + tilde(tau)$ where $tilde(C) = x E$ because it is the re-integrated input, and isn't dependent on time constant. 
+Recurrent Networks: $W + D E$, identity Decoding $v D = y$. Set $tau_m = 0 arrow v = sigma(s)$. \
+If we're integrating the input, then $tau_s (d s)/(d t) = -s + sigma(s) W + beta + C$. \
+Then, $
+(d s)/(d t) &= (-s + v W + beta)/tau_s + tilde(C) \
+arrow.double tau_s (d s)/(d t) &= (v D + tau_s x)E + beta - s \
+&= (y + tau_s x) E + beta - s
+$. Note $tilde(C) = x E$ doesn't depend on $tau$ because it is the re-integrated input, and isn't dependent on time constant. 
 
 #box(
   image("../assets/general_dynamic_system.png", width:50%)

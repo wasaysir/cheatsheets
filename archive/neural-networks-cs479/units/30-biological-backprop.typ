@@ -20,7 +20,7 @@ Given dataset $x, y$ and $theta = {M^i, W^i}_(i=1, dots, L-1)$, the goal is to $
 $p(x | y) = p(x^1 | x^2) p(x^2 | x^3) dots p(x^(L-1) | y) = p(x^1 | mu^1) dots p(x^(L-1) | mu^(L-1))$
 
 If we assume $x^i tilde cal(N)(mu^i, v^i)$, then $p(x^i | mu^i) prop exp(- (norm(x^i - mu^i)^2)/(2(v^i)^2))$
-Then, $- log p(x^i | mu^i) = 1/2 norm((x^i - mu^i)/v^i)^2 + C$, so as a result. $- log p(x | y) = 1/2 sum^(L-1)_(i=1) norm(epsilon^i)^2$
+Then, $- log p(x^i | mu^i) = 1/2 norm((x^i - mu^i)/v^i)^2 + C$, so as a result, $- log p(x | y) = 1/2 sum^(L-1)_(i=1) norm(epsilon^i)^2$
 
 === Hopfield Energy
 $F = 1/2 sum^(L-1)_(i=1) norm(epsilon^i)^2$
