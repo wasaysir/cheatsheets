@@ -9,7 +9,7 @@
 - Can't do some typical operations like random write. Optimized for large sequential reads and append-only writes
 - Intelligent Client (client can find location of blocks, and accesses data directly from datanode)
 
-#image("/assets/image.png")
+#image("../assets/hdfs-architecture.png")
 - Client only gives file name. 
 - Namenode provides a list of block ids & block locations. Then client finds closest data node to request data.
 - Namenode only stores location of data on datanodes, but not the actual data. 

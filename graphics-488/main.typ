@@ -3,7 +3,7 @@
 #set text(font: "Helvetica")
 
 #show: cheatsheet.with(
-  title: "CS486", 
+  title: "CS488 - Graphics", 
   authors: "Wasay Saeed",
   write-title: false,
   font-size: 5.5pt,
@@ -26,6 +26,8 @@
 #include "units/03-device-interfaces.typ"
 #include "units/04-geometries.typ"
 #include "units/05-affine-geometry.typ"
-#include "units/06-windows_and_viewports.typ
-"
+#include "units/06-windows-and-viewports.typ"
+#include "units/07-clipping.typ"
+#include "units/08-projections.typ"
+#include "units/09-rendering-pipeline.typ"
 #include "units/99-opengl.typ"

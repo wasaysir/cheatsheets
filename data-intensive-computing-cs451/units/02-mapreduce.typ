@@ -30,3 +30,10 @@ Reducers are woken after majority of mapers are done. They need all the ifiles t
 - Combiner runs (or might run) during the merges
 - To reduce file handles, they merge intermediate files in the combiner (if CPU is idle)
 - Spills are then hashed and partitioned before moving to different reducers
+- Maps are usually assigned to local data, or assigned to nearest worker.
+
+*In-Mapper/Memory Combine*:
+- _Combiners improve performance by reducing network traffic_ so In-Mapper Combiners are super fast, if you're not memory bound.
+- To implement IMC, override setup and cleanup, so the cleanup can do the combiner step for you. 
+- Needs to preserve state across calls to map
+- Speeds up, but requires memory management (we make data structure for intermediate values instead of emitting and hadoop storing)
