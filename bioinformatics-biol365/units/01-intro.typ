@@ -6,5 +6,5 @@ Current state: Easier to get data than it is to interpret and there's a bigger f
 
 / Accession: Unique identifier for biodata.
 
-Different scopes on bioinf: Cellular, Organism, Species
+Different scopes on bioinformatics: Cellular, Organism, Species
 
