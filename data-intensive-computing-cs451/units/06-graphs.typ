@@ -43,13 +43,13 @@ We can represent this as a stochastic adjacency matrix $M$, a square matrix inde
 [y], [1/2], [0], [1],
 [z], [0], [1/2], [0])
 
-\ Random walker interpretation: Imagine random web surfer on page $i$ at time $t$, at time $t + 1$ they randomly select outlink from $i$, so the $r$ column is probability of being on any page. When this probability stabilizes, this is a stationary distribution. 
+Random walker interpretation: Imagine random web surfer on page $i$ at time $t$, at time $t + 1$ they randomly select outlink from $i$, so the $r$ column is probability of being on any page. When this probability stabilizes, this is a stationary distribution. 
 
-\ Stationary Distribution: Unique and eventually reached value in a random walk in a Markvo process no matter what initial probability distribution is if it's ergodic (non bi-partite and connected)
+Stationary Distribution: Unique and eventually reached value in a random walk in a Markvo process no matter what initial probability distribution is if it's ergodic (non bi-partite and connected)
 
-\ Spider-Traps: All out-links are within same group causing it to absorb all importance. Not-connected => Not ergodic. Not a mathematical problem, but a correctness one—they're useless.
+Spider-Traps: All out-links are within same group causing it to absorb all importance. Not-connected => Not ergodic. Not a mathematical problem, but a correctness one—they're useless.
 - Solution: Random teleports with probability $beta$ so it never gets stuck on a spider trap. This is the "damping factor"
-\ Dead-Ends: No out-links, cause importance to "leak out" Not connected => Not ergodic. These are not column stochastic, so initial Markov assumptions aren't met.
+Dead-Ends: No out-links, cause importance to "leak out" Not connected => Not ergodic. These are not column stochastic, so initial Markov assumptions aren't met.
 - Solution: Always teleport if at a dead-end to any random page.
 
 Final Google solution:
@@ -74,7 +74,7 @@ Solution:
 - Version 1: Sum all ranks, 1 - R is missing mass, and add (1 - R) / N. Looks like: Map(send mass) -> reduce(compute new mass) -> Map(add missing mass), but combined is Map(add miss mass then send mass) -> Reduce(compute new mass) with a final add miss mass step after all iterations.
 - Version 2: In the mapper, dead-ends send their entire rank to an "everyone" special key and the reducer adds $1/N times$ everyone rank to each sum. This requires the everyone node to be send to each reducer, but with an IMC, the mapper only sends 1 extra message per reducer.
 
-\ Log Masses: Easy way to add up small numbers and avoid precision issues.
+Log Masses: Easy way to add up small numbers and avoid precision issues.
 
 === Spam Farming/Trustworthiness
 
@@ -85,4 +85,4 @@ Spider-trap-farming: Page you want to promote has millions of hidden links to fa
 - Solution: Instead of random jumps, start from sample of "trustworthy" pages as a sample. Use "good" pages, and after iterations, all pages have trust factor between 0 and 1, and pick a threshold to mark pages below as spam. 
 - Assume trustworthy pages link to other trustworhty pages. By only *teleporting* to trustworthy sites, only "good" partitions accumulate trust.
 
-\ Spam Mass: $r_p$ PageRank of page $p$, $r_p^+$ PageRank of Page p, but random jumps to trusted pages. $r_p^-$ is contribution of low-trust pages to $p$'s rank. $S_p = r_p^- / r_p$ as spam mass, higher spam mass, more closely you are spam.
+Spam Mass: $r_p$ PageRank of page $p$, $r_p^+$ PageRank of Page p, but random jumps to trusted pages. $r_p^-$ is contribution of low-trust pages to $p$'s rank. $S_p = r_p^- / r_p$ as spam mass, higher spam mass, more closely you are spam.

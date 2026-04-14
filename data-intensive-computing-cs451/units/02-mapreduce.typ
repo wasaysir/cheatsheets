@@ -1,7 +1,7 @@
 = MapReduce
 Two functions: Map and Reduce
-\ Map: Takes an Iterable and a function, then outputs an Iterable with the function applied to each element. In MapReduce, a flatten step is done after, where all the lists are merged.
-\ Reduce: Takes an initial object, an Iterable of elements, and a reducing function that accepts the initial and the iterable, and does that across all of the project to produce the final output.
+Map: Takes an Iterable and a function, then outputs an Iterable with the function applied to each element. In MapReduce, a flatten step is done after, where all the lists are merged.
+Reduce: Takes an initial object, an Iterable of elements, and a reducing function that accepts the initial and the iterable, and does that across all of the project to produce the final output.
 
 MapReduce is based around Key-Value Pairs
 Programer needs to define three (maybe four) functions: 

@@ -1,10 +1,10 @@
 = Relational Data
-\ OLTP: Online Transaction Processing:
+OLTP: Online Transaction Processing:
   - Most apps
   - User-facing
   - Tasks: Small set of common queries
   - Access: Random reads, small writes
-\ OLAP: Online Analytical Processing:
+OLAP: Online Analytical Processing:
   - BI and Data Mining
   - Back-end: Batch workloads, low concurrency
   - Tasks: Complex analytics (Ad-hoc)
@@ -12,13 +12,13 @@
 
 #image("/assets/image-5.png")
 
-\ Data Warehousing: Take a database tuned for OLTP and ETL (Extract, Transform, Load) it to a data warehouse tuned for OLAP. This can support multiple databases.
+Data Warehousing: Take a database tuned for OLTP and ETL (Extract, Transform, Load) it to a data warehouse tuned for OLAP. This can support multiple databases.
 
-\ ETL: Extract (Pull data from DB), Transform (Clean + Put into schema suited for OLAP), Load (put into data warehouse). Done regularly during periods of low use. 
+ETL: Extract (Pull data from DB), Transform (Clean + Put into schema suited for OLAP), Load (put into data warehouse). Done regularly during periods of low use. 
 
 *OLAP vs OLTP schema*: OLTP is relational between items. OLAP has a "star" schema, with a center fact table pointing to dimension tables. Stars are used because BI and data-mining queries are ad-hoc, and schemas can't be designed around ad-hoc queries.
 
-\ Fact Table: Contains all elements that don't relate to the other rows. 
+Fact Table: Contains all elements that don't relate to the other rows. 
 
 #image("/assets/image-4.png")
 
@@ -26,7 +26,7 @@
 - Good if data is structured, clean, and queries are known
 - Bad when unstructured, noisy/messy, and you don't know what you're looking for
 
-\ Data Lakes: Relational and non-relational data from many sources. No schema, low-cost storage. Mix of curated and raw data. Useful for data science/develops/analysts. Main diff from data warehouse is data warehouses store structured, filtered data and prioritize performance. 
+Data Lakes: Relational and non-relational data from many sources. No schema, low-cost storage. Mix of curated and raw data. Useful for data science/develops/analysts. Main diff from data warehouse is data warehouses store structured, filtered data and prioritize performance. 
 
 #image("/assets/image-6.png")
 

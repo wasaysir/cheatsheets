@@ -22,9 +22,9 @@ Array type is automatically derived. You can have an array of mixed types, eithe
 - Letting it be type Any
 
 ==== Array
-\ Array access: `myArray(5)` selects 5th index of Array
-\ Array append: `myArr :+ e` appends element `e` to end of `myArr`
-\ Array prepend: `e +: myArr` places element `e` at front of `myArr`
+Array access: `myArray(5)` selects 5th index of Array
+Array append: `myArr :+ e` appends element `e` to end of `myArr`
+Array prepend: `e +: myArr` places element `e` at front of `myArr`
 Note arrays are immutable, so this is a copy-and-write with a shallow copy, so object references are copied over. \
 `varArr ++= valArr` is an inplace concatenation of `valArr` to `varArr` \
 `valArr ++= varArr` is impossible, since `valArr` is immutable \
@@ -71,7 +71,7 @@ Note arrays are immutable, so this is a copy-and-write with a shallow copy, so o
     - e.g. (`_ + _`) equivalent to `def func(x, y) = {x + y}`
 
 *Tuple Unpacking*: `(k, v) <- pair`
-\ Unit: Scala equivalent for Void to denote a lack of a value. 
+Unit: Scala equivalent for Void to denote a lack of a value. 
 
 ==== Pattern Matching
 Equivalent to `case`, but allows for pattern matching within the case itself.
