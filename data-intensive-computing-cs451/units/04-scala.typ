@@ -11,7 +11,7 @@ Variables:
 
 `var, val` refers to mutable and immutable references, respectively. A `var` reference to an immutable object changes the reference to a new object when reassignment. Similarly, `val` can reference mutable objects
 
-Spark automatically does type inference if possible, but it doesn't allow dyamic typing.
+Spark automatically does type inference if possible, but it doesn't allow dynamic typing.
 
 === Collections:
 Array is declared as `var myArray = Array(1, 2.0, 3)` \
@@ -61,7 +61,7 @@ Note arrays are immutable, so this is a copy-and-write with a shallow copy, so o
   - parameter types are mandatory
   - In function body, last line should be the returned value
   - Don't use keyword `return` unless you want to return in multiple places, otherwise Scala will throw compile errors
-- You can call functions like `F(x, y)`, but if function has no parameters `F()`, you can cal function with `F`
+- You can call functions like `F(x, y)`, but if function has no parameters `F()`, you can call function with `F`
   - Using `F _` allows you to pass function as a value, without calling it
 - Anonymous functions
   - e.g. `(x: Int) => x * x`
@@ -82,3 +82,20 @@ Equivalent to `case`, but allows for pattern matching within the case itself.
   case _ => "?"
 }
 `
+
+==== Option
+Collection holding up to 1 A type value—either None or Some[A]. To get A val, from a Some, use get. 
+`def maybeAdd1(x: Option[Int]): Option[Int] = x match {
+  case Some(y) => Some(y+1)
+  case None => None
+}
+` or `case None => None
+case _ => Some(x.get + 1)`
+
+==== Map Data Struct
+`Map[K, V].get(k)` returns `Option[V]`
+`Map[K, V](k)` returns V or throws key not found exception
+
+==== Interoperability with Java
+Scala can interact with Java objects, but not Java collections. So you must convert.
+`import scala.collection.JavaConverts._` and then `javaArrayBuffer.asScala`

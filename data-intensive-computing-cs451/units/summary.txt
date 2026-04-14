@@ -1,0 +1,4277 @@
+summary:
+CS451 Course Notes
+0%
+• 83 min read
+
+Professor: Dan Holtby | Fall: Term 2025
+
+Lecture 1
+Java is like C++, BUT
+
+No operator overloading. if (word == "Waterloo") is always false. Use the .equals method
+Single Inheritance
+It uses the word Generic not Template
+Price per GB over the years seems to drop at exponential rate.
+
+Facebook generates ~4 million GB a day
+500 million new tweets a day
+720,00 hours of new YouTube videos per day
+We generate ~500 exabytes per day. This seems like a lot, but nothing compared to what it is going to be.
+
+Big data is horizontal scaling / cheap computers, just more of them.
+
+Parallelization is hard. Deadlocks, livelocks, race conditions except on more than one computer.
+
+We are not going to design fault-tolerant distributed computer networks. We are going to use one.
+
+You don’t need to understand the hardware to use assembly. You don’t need to understand assembly to use C++. You didn’t need to understand a hash table to use std::UnorderedMap.
+
+Question
+
+How can we abstract a distributed network?
+
+This course involves a little bit of Data Science Tools, Analytics Infrastructure, Execution Infrastructure.
+
+Lecture 2
+For text processing we usually start with simple word counters.
+
+Word Count in Python
+
+
+counts = Counter()
+with open("file.txt", "rt") as file:
+	for line in line:
+		counts.update(tokenize(line))
+This is basically as fast as your HDD.
+
+Most simple processing is likely bottlenecked by the load, not the processing.
+
+Horizontal scaling: 100x the servers, 100x the speed? Not always true. Not all algorithms can be run in parallel without overhead.
+
+Word count in parallel - Divide the file into 1/100th. Each server counts x and adds the totals together. This is easier said than done.
+
+Question
+
+We can’t split it by line number, why?
+
+We don’t know where the new lines are. We’d have to scan through and count, this is slow.
+
+Question
+
+Can we split by bytes?
+
+This works, but has an issue. We could end up splitting a word in the middle of the word. There are many solutions to this.
+
+MapReduce
+
+Two functions
+
+Map: ≈ Python’s / Racket’s CS135 Map
+Reduce: ≈ Python’s Reduce
+MapReduce is based around key-value pairs (records). This is a common way to break things down.
+
+If the input is a text file:
+
+Key - Position of a line (Byte # not line #) Value - Text of a line
+
+Programmer defines two functions:
+
+map: (k 
+1
+​
+ ,v 
+1
+​
+ )→List[(k 
+2
+​
+ ,v 
+2
+​
+ )]
+reduce: (k 
+2
+​
+ ,List[v 
+2
+​
+ ])→List[(k 
+3
+​
+ ,v 
+3
+​
+ )]
+The output key can be different than the input key.
+
+MapReduce requires a key, even though we only need a single integer (the count).
+
+A file gets split and sent to a bunch of mappers. They then compute their counts and send them to one of the mappers to then apply the reduce function to merge the results. The map function processes line by line.
+
+What about memory?
+
+The Counter() used 8 bytes max.
+
+How much does the Dictionary use? O(n) if there are n unique words.
+
+In 10TB of data, what is n? We don’t care, we are working line by line.
+
+How many unique words per line? Not many (Heaps law).
+
+But thinking at scale means we have to be careful when we say something is probably small.
+
+Alternative to Map Counting. We don’t need a dictionary for each row, we can emit words as soon as we see them (so (key, 1)). Might seem less efficient but repeats words aren’t that common.
+
+The mappers then send the list of (key, 1) pairs to the reducer, where the key is the word and the value is its count. The reducer adds up all intermediate results. But it can now be a bottleneck.
+
+Question
+
+Can we have multiple reducer like mappers?
+
+
+def map(line):
+	for word in line:
+		emit(word, 1)
+ 
+def reduce(key, values):
+	sum = 0
+	for v in values:
+		sum += v
+	emit(key, sum)
+The Reduce server is getting too much data. If the file was 10TB, then more than 10TB will arrive.
+
+Question
+
+What if we have multiple reducers?
+
+Each reducer gets ALL pairs for a given key.
+
+Programmer defines three functions:
+
+map: (k 
+1
+​
+ ,v 
+1
+​
+ )→List[(k 
+2
+​
+ ,v 
+2
+​
+ )]
+reduce: (k 
+2
+​
+ ,List[v 
+2
+​
+ ])→List[(k 
+3
+​
+ ,v 
+3
+​
+ )]
+partition: (k 
+2
+​
+ ,v 
+n
+​
+ ,n∈N)→[0,n)
+Partition will default to a hash function that hashes the key and ignores the value.
+
+Partition takes a key-value pair plus the numbers of reducers (n) and assigns it to one of the reducers. Although it is given the value as well as the key, you normally want to decide based only on the key. Otherwise this defeats the purpose.
+
+
+def map(pos: Long, text: String):
+	for word in tokenize(text):
+		emit(word, 1)
+ 
+def reduce(key: String, Iterator[int]):
+	sum = 0
+	for v in values:
+		sum += v
+	emit(key, sum)
+ 
+def partition(key: String, value: Int, reducer_count: Nat):
+	return hashcode(key) % reducer_count
+When dealing with hash codes that can be negative: hashcode & INT_MAX % n
+
+The term for sending records to different reducers depending on what the partition tells us is called shuffling.
+
+Hadoop is the most famous open-source implementation of MapReduce. Google has a proprietary implementation in C++.
+
+Hadoop provides an open-source implementation in Java. Development begun by Yahoo, later an Apache project. Used in production at Facebook, Twitter (X), Netflix, etc.
+
+Framework: Assigns workers to map and reduce. Divides data between map workers. Groups intermediate values (sorting pairs by key, determining which pairs go to which reduce worker). Handles errors (some workers might fail or crash).
+
+Input goes to mappers. Mappers complete their tasks and sort their maps.
+
+We then group values by key across mappers.
+
+We then reduce and receive out output.
+
+Question
+
+What’s the slowest operation here?
+
+Sending intermediate results from the mappers to the reducers.
+
+How about only one value per key per mapper?
+
+
+def combine(key, values):
+	sum = 0
+	for v in values:
+		sum += v
+	emit(key,sum)
+Programmer defines four functions:
+
+map: (k 
+1
+​
+ ,v 
+1
+​
+ )→List[(k 
+2
+​
+ ,v 
+2
+​
+ )]
+combine: (k 
+2
+​
+ ,List[v 
+2
+​
+ ])→List[(k 
+2
+​
+ ,v 
+2
+​
+ )]
+reduce: (k 
+2
+​
+ ,List[v 
+2
+​
+ ])→List[(k 
+3
+​
+ ,v 
+3
+​
+ )]
+partition: (k 
+2
+​
+ ,v 
+n
+​
+ ,n∈N)→[0,n)
+Combine is an optional thing the mapper / reducer might do when idle. Input and output types are not allowed to be different.
+
+Conceptually it should always be producing one key-value pair, since the whole point is to combine many values into one for the same key.
+
+Combine might be the same as reduce if k 
+2
+​
+ =k 
+3
+​
+ ,v 
+2
+​
+ =v 
+3
+​
+ , then it would be legal to do.
+
+It also might not. Even if legal, it might be inappropriate. It can run but give the wrong answer.
+
+For averages it can give the wrong answer: Mean(2,3,4) → 3 versus Mean(Mean(2,3),4) → 3.25
+
+Physical View
+
+User submits a job to the cluster
+The cluster schedules the map and reduce tasks - the number of map tasks is derived from the size of the input file(s). The number of reduce tasks is set by the user
+The workers start reading and mapping their split of the file
+As they map, they save the “intermediate” key-value pairs to the local file system, not to the network file system
+When the job is nearly finished, reducer workers start asking mappers for intermediate files that are ready
+Once a reducer has all of its intermediate files it begins applying reduce - the output is written to the network file system
+Distributed Group By in MapReduce
+
+Map: Map outputs are buffered in memory in a circular buffer. When buffer reaches threshold, contents are spilled to disk. Spillers are merged into a single, partitioned file (sorted within each partition). Combine runs (or might run) during the merges.
+
+Reduce: First, map outputs are copied over to reducer machine. Sort is a multi-pass merge of map outputs (happens in memory and on disk). Combiner runs during the merges. Final merge pass goes directly into reducer.
+
+The Combiner in the Reducer usually runs when waiting for some mappers to finish (when some are already done). Not as advantageous as running combiner in Mapper though.
+
+Lecture 3
+
+class MRIterator(Iterator):
+	def __init__(self, files):
+		self.files = files
+		self.key = getSmallestKey(files)
+		
+	def next(self):
+		key, value = getSmallestRecord(files)
+		if key != self.key:
+			raise EOFEXception
+		commitRead(files)
+		return value
+Transferring from mapper to reducer is the bottleneck.
+
+We assign chunks to servers (this is called sharding).
+
+We put multiple servers in a server rack. Clusters of racks of servers build a data centre.
+
+Storage Hierarchy:
+
+Local machine (L1/L2/L3 cache, memory, SSD, magnetic disks)
+Remote machine (same rack)
+Remote machine (different rack)
+Remote machine (different server)
+Distributed File System
+
+Assume we have 20 identical networked servers each with 100 TB Of disk space.
+
+Question
+
+How would you store a file on these servers?
+
+If a server that contains one of the chunks fails, the files become corrupted. Since failure rate is high on commodity servers, we need to figure out a solution.
+
+If each chunk is stored on multiple servers, if a server fails there is a backup. The number of copies determines how much resilience we want.
+
+Hadoop Distributed File System (HDFS)
+
+Very large distributed file system (10k nodes, 100 million files, 10 PB).
+Assume commodity hardware
+Files are replicated to handle hardware failure
+Detect failures and recover from them
+Optimized for batch processing
+Provides very high aggregate bandwidth
+DFS
+
+Data coherency
+Write-once-read-many access model
+Client can only append to existing files
+Files are broken into blocks
+Each block is replicated on multiple DataNodes
+Intelligent Client
+Client can find location of blocks
+HDFS Architecture
+
+The namenode stores where the data is located on datanodes (not the actual data)
+
+May still have a redundant namenode in the background if the primary one fails. HDFS client gets data information from namenode and then interacts with datanodes to get that data.
+
+HDFS client asks the HDFS namenode to read from a file. The HDFS namenode returns the block id and block location to the client. The HDFS client then goes to the HDFS datanode to get the block data.
+
+Functions of a NameNode
+
+Managers file system namespace
+Maps a file name to a set of blocks
+Maps a block to the DataNodes where it resides
+Cluster configuration management
+NameNode metadata
+
+Metadata in memory
+Entire metadata is in main memory
+Types of metadata
+List of files
+List of Blocks for each file
+List of DataNodes for each block
+Transaction Log
+DataNode
+
+Block server
+Stores data in the local file system
+Stores metadata of a block
+Serves data and metadata to clients
+Block report
+Sends a report of all existing blocks to the namenode
+Facilitates pipelining of data
+Forwards data to other specified DataNodes
+Block Placement Policy
+
+Current policy: 3 replicates will be stored on at least 2 racks
+One replica on a local node
+Second replica on a remote rack
+Third replica on same remote rack
+Rebalance might later move this to a third rack
+Clients read from nearest replica
+If all data is on one rack, all it takes is one fire to lose it all. Inter-rack communication has higher latency, lower bandwidth than intra-rack, so the remote replica is sent to one rack, and assigned to two nodes there.
+
+DataNodes send heartbeat to the Namenode once every 3 seconds. NameNode uses heartbeats to detect DataNode failure.
+
+Replication Engine - NameNode detects DataNode failures. Chooses new DataNodes for new replicates, balances disk usage, and balances communication traffic to DataNode.
+
+Hadoop Cluster Architecture
+
+Question
+
+How do we get data to the workers
+
+Compute nodes communicate with SAN: Storage Area Network
+
+This makes sense for compute-intensive tasks as computations are likely to take long while even on sophisticated hardware. Communication costs are outweighed by computation costs. For data-intensive tasks, computations aren’t likely to take nearly as long, so computation costs are outweighed by the communication costs. Likely to experience latency even with high speed transfer.
+
+Solution is to not move data to workers, but move workers to data.
+
+Key idea: Co-locate storage and compute. Start up worker on nodes that hold the data.
+
+If a server is responsible for both data storage and processing, Hadoop can do some optimization.
+
+On a Hadoop cluster, resource manager is in charge of running tasks. The resource manager assigns jobs to workers that already have relevant data (so it talks to the NameNode).
+
+Combiner design
+
+Combiners are like Reducers - they have the same signature. A reducer can have different key types. Combiners are optional.
+
+
+def map(key: String, value: Int):
+	emit(key, (value, 1))
+ 
+def combine(key: String, values: List[(Int, Int)]):
+	for (v,c) in values:
+		sum += v
+		count += c
+	emit(key, (sum, count))
+ 
+def reduce(key: String, values: List[(Int, Int)]):
+	for (v,c) in values:
+		sum += v
+		count += c
+	emit(key, sum / count)
+To go faster: Combiners improve performance by reducing network traffic. Combiners work during file merges. Local filesystem is faster than network access. But memory is faster than the filesystem.
+
+
+class mapper:
+	def setup(self):
+		self.sums = Map()
+		self.counts = Map()
+	def map(self, key, value):
+		self.sums[key] += value
+		self.counts[key] += 1
+	def cleanup(self):
+		for (key, count) in counts:
+			emit(key, (sums[key], count))
+In-Mapper Combin
+
+Preserve state across calls to map
+Advantage: Speed
+Disadvantage: Requires memory management
+Question
+
+Can we do this for word frequency?
+
+
+class mapper:
+	def setup(sefl):
+		counts = HashMap()
+	def map(self, key: Long, value: String):
+		for word in tokenize(value):
+			counts[word] += 1
+	def map_cleanup():
+		for (key, count) in counts:
+			emit(key, count)
+Lecture 4
+New Problem: Term Co-occurrence
+
+M 
+ij
+​
+  : number of times word i and word j co-occur in some context.
+
+Example
+
+How many times is i followed immediately by j in a sentence.
+
+M is N×N where N is the vocabulary.
+
+There are two approaches to this.
+
+Pair - Compute individual cells
+Stripe - Compute individual rows
+We start with describing the Pairs implementation.
+
+Mapper
+
+Input: Sentence
+Output: ((a,b),1), for all pairs of words a,b in the sentence
+Reducer
+
+Input: Pair of words, list of counts
+Output: Pair of words, count
+The reducer can also serve as the combiner.
+
+
+def map(key: Long, value: String):
+	for u in tokenize(value):
+		for each v that cooccurrs with u in value:
+			emit((u,v), 1)
+ 
+def reduce(key: (String, String), values: List[Int]):
+	for value in values:
+		sum += value
+	emit(key, sum)
+Pairs is easy to implement and easy to understand. But there are a lot of pairs and the combiner doesn’t do much. This is because there are N×N potential keys.
+
+Now on to Stripes.
+
+Mapper
+
+Input: Sentence
+Output: (a,{b 
+1
+​
+ :c 
+1
+​
+ ,b 
+2
+​
+ :c 
+2
+​
+ ,…,b 
+m
+​
+ :c 
+m
+​
+ }), where
+a is a word from the input
+b 
+1
+​
+ …b 
+m
+​
+  are all words that co-occur with a
+c 
+i
+​
+  is the number of times (a,b 
+i
+​
+ ) co-occur
+{} means a map.
+
+
+def map(key: Long, value: String):
+	for u in tokenize(value):
+		counts = {}
+		for each v that cooccurs with u in value:
+			counts(v) += 1
+		emit(u, counts)
+ 
+def reduce(key: Long, values: List[Map[String->Int]]):
+	for value in values:
+		sum += value
+	emit(key, sum)
+Adding two maps means taking the union of the keys, and setting the value to be the sum of the two values if it occurs in both maps.
+
+Stripes has fewer key-value pairs to send, and combiners do more work. This is computationally intensive, and the map may not fit in memory.
+
+For English words and normal sentence lengths, the stripe fits in memory easily.
+
+Relative frequencies (another problem)
+
+f(B∣A)= 
+N(A,∗)
+N(A,B)
+​
+ 
+​
+ 
+Where N(A,B) is the number of co-occurrences of A and B, and N(A,∗) is the sum of N(A,x) over all x.
+
+Pairs - reduce
+
+
+def reduce(key: Pair[String], values: List[Int]):
+	let (a,b) = key;
+	for v in values:
+		sum += v
+	emit((b,a), sum / freq(a))
+Question
+
+What is freq(a)?
+
+We don’t know until we have processed all keys of the form (a,∗)
+
+Pairs - mapper and partitioner
+
+
+def map(key: Long, value: String):
+	for u in tokenize(value):
+		for v in cooccurrence(u):
+			emit((u,v), 1)
+			emit((u, "*"), 1)
+ 
+def partition(key: Pair, value: Int, N: Int):
+	return hash(key.left) % N
+Improved version
+
+
+def map(key: Long, value: String):
+	for u in tokenize(value):
+		for v in cooccurrence(u):
+			emit((u,v), 1)
+		emit((u, "*"), len(cooccurrence(u)))
+ 
+def partition(key: Pair, value: Int, N: Int):
+	return hash(key.left) % N
+Pairs - reducer
+
+
+marginal = 0
+ 
+def reduce(key: Pair, values: List[Int]):
+	let(a,b) = key
+	for (v in values):
+		sum += v
+	if (b == "*"):
+		marginal = sum
+	else:
+		emit((b,a), sum / marginal)
+This will work in Hadoop using English.
+
+The assignment requires computing Pairwise Mutual Information (PMI)
+
+PMI(x,y)=log 
+p(x)p(y)
+p(x,y)
+​
+ 
+​
+ 
+PMI is useful for establishing “semantic distance” between tokens. Tokens with similar lists of cooccurrences sorted by PMI likely have similar meaning. 1 usually means exact same meaning, and -1 usually means exact opposite meaning.
+
+Lecture 5
+The datacenter as a computer.
+
+Question
+
+What is the instruction set?
+
+Hadoop.
+
+Layers of abstraction
+
+Higher level language
+Lower level language
+Assembly
+Machine code
+Instruction set architecture
+Micro-architecture
+Gates, adders, registers
+Electronics
+Physics
+Data centre abstraction
+
+Spark
+Hadoop task
+HDFS / Hadoop framework
+Cluster of computers
+Individual servers
+Hadoop is an alternative to assembly, but it has a lot of boilerplate and repetition. It is very tedious to program.
+
+Question
+
+Can we create a Distributed C (or Python) to Hadoop’s assembly?
+
+Facebook built Apache Hive and Yahoo built Apache Pig.
+
+Hive is on top of MapReduce. It is good for large datasets accessed in a linear fashion.
+
+Pig and Hive are both converted to MapReduce jobs at the end of the day.
+
+Example
+
+Find the top 10 most visited pages in each category with Pig
+
+
+visits = load '/data/visits' as (user, url, time);
+gVisits = group visits by url;
+visitCounts = foreach gVisits generate url, count(visits);
+urlInfo = load '/data/urlInfo' as (url, category, pRank);
+visitCounts = join visitCounts by url, urlInfo by url;
+gCategories = group visitCounts by category;
+topUrls = foreach gCategories generate top(visitCounts,10);
+ 
+store topUrls into '/data/topUrls';
+
+Reduce 3
+Map3
+Map2
+Reduce2
+Reduce1
+Map1
+foreach category generate top 10 urls
+group by category
+load urlInfo
+join on url
+for each url generate count
+group by url
+load visits
+MapReduce workflows have a lot of disk i/o involved which significantly reduces running MapReduce jobs like this.
+
+We can do Map-to-Map (usually not a very strong need).
+
+There is a higher-order Mapper class called ChainMapper which lets you pass in 2+ Mapper classes and it will chain them together.
+
+We can also have Map-to-Reduce-to-Reduce.
+
+The second job’s map function is pretty much an identity function map.
+
+Question
+
+Is there a better instruction set?
+
+Hadoop 2.
+
+Nodes are now resource managers. Can do MapReduce the same as always, and can also do other things.
+
+Spark is more popular than Hadoop today. The only mechanism we had in MapReduce was map and reduce. Spark brings more.
+
+Resilient Distributed Dataset - RDD. RDD[T] is a collection of values of type T.
+
+RDDs are divided into partitions. Workers operate on partitions independently.
+
+Lecture 6
+Spark provides a more enriched instruction set.
+
+map(f) - f is given one value of type T, and returns one value of type U. Each worker will call f(x) on each item x from RDD 
+in
+​
+ . Each worker will put the value returned by f(x) into a partition of RDD 
+out
+​
+ 
+
+flatMap(f) - f is given one value of type T, and returns an iterator/iterable collection that produces values of type U. Each worker will call f(x) on each item x from RDD 
+in
+​
+ . Each worker will then traverse the iterable returned by f(x), and each value gets added to RDD 
+out
+​
+ .
+
+mapPartitions(f) - f is given an iterator that produces value of type T, and returns an iterator/iterable collection that produces values of type U. Each worker will call f(x) ONCE where x is an iterator that traverses all items in that worker’s partition of RDD 
+in
+​
+ . Each worker will then traverse the iterable returned by f(x), and each value gets added to RDD 
+out
+​
+  just like flapMap.
+
+Reduce-like operations.
+
+groupByKey - like MapReduces shuffle. Not the reduce part, this is just the shuffle that brings the pairs to a single place. You’d then use map flatMap to perform the reduce action itself.
+
+reduceByKey - like Map Reduce’s shuffle + combine + reduce.
+
+aggregateByKey - a more complicated reduceByKey.
+
+Question
+
+What is Spark?
+
+Fast and expressive cluster computing engine compatible with Apache Hadoop.
+
+It is up to 10x faster on disk, 100x in memory, and 2-5x less code.
+
+Efficient - uses general execution graphs and in-memory storage.
+
+Usable - Rich APIs in Java, Scala, Python & an interactive shell.
+
+Key concept of RDDs: Write programs in terms of operations on distributed datasets.
+
+RDD:
+
+Collections of objects spread across a cluster, stored in RAM or on disk. Built through parallel transformations. Automatically rebuilt on failure.
+Operations:
+
+Transformations and actions
+RDDs track lineage information that can be used to efficiently recompute lost data.
+
+
+msgs = textFile.filter(lambda s: s.startsWith("ERROR"))
+				.map(lambda s: s.split("\t")[2])
+
+filter
+map
+HDFS File
+Filtered RDD
+Mapped RDD
+SparkContext is the main entry point to Spark functionality. Available in shell as variable sc.
+
+
+# Turn a Python collection into an RDD
+nums = sc.parallelize([1,2,3])
+# Load text file from local FS, HDFS, s3
+sc.textFile("directory/*.txt")
+ 
+# Pass each element through a function
+squares = nums.map(lambda x: x*x) # {1,4,9}
+ 
+# Keep elements passing a predicate
+even = squares.filter(lambda x : x % 2 == 0) # {4}
+ 
+# Map each element to zero or more others
+nums.flatMap(lambda x: => range(x))
+# => {0,0,1,0,1,2}
+ 
+nums = sc.parallelize([1,2,3])
+ 
+nums.collect() # => [1,2,3]
+nums.take(2) # => [1,2]
+nums.count() # => 3
+ 
+nums.reduce(lambda x, y: x + y) # => 6
+ 
+nums.saveAsTextFile("hdfs://file.txt")
+Spark’s distributed reduce transformations operate on RDDs of key-value pairs.
+
+
+pair = (a,b)
+pair[0] # => a
+pair[1] # => b
+
+val pair = (a,b)
+pair._1 // => a
+pair._2 // => b
+
+Tuple2 pair = new Tuple2(a,b);
+pair._1 // => a
+pair._2 // => b
+While this seems bad, we rarely need to deal with pairs in Scala. You can use pattern matching / case lambdas in a way that’s not entirely unlike packing in Python.
+
+Key-value operations
+
+
+pets = sc.parallelize(
+		[("cat", 1), ("dog", 1), ("cat", 2)])
+	
+pets.reduceByKey(lambda x, y: x + y) # => {(cat, 3), (dog, 1)}
+pets.groupByKey() # => {(cat, [1, 2]), (dog, [1])}
+pets.sortByKey() # => {(cat, 1), (cat, 2), (dog, 1)}
+Word count in Python
+
+
+lines = sc.textFile("hamlet.txt")
+counts = lines.flatMap(lambda line: line.split(" "))
+				.map(lambda word: (word, 1))
+				.reduceByKey(lambda x, y: x + y)
+							.saveASsTextFile("results")
+Word count in Scala
+
+
+val textFile = sc.textFile("hamlet.txt")
+ 
+textFile
+	.flatMap(line => line.split(" "))
+	.map(word => (word, 1))
+	.reduceByKey((x,y), => x + y)
+	.saveAsTextFile("results")
+
+visits = sc.parallelize([("index.html", "1.2.3.4")])
+ 
+pageNames = sc.parallelize([("index.html", "Home")])
+ 
+visits.join(pageNames)
+# ("index.html", "(1.2.3.4, "Home"))
+All the pair RDD operations take an optional second parameter for number of tasks.
+
+
+words.reduceByKey(lambda x, y: x + y, 5)
+words.groupByKey(5)
+visits.join(pageViews, 5)
+The default is to use the same number of partitions for destination that the source has. If you specify spark.default.parallelism, it will use this as the default instead.
+
+Under the hood: DAG scheduler
+
+General task graphs that automatically pipeline functions. Data locality aware and partitioning aware to avoid shuffles. A job is broken down to multiple stages that form a DAG.
+
+You can get the DAG from an RDD using the toDebugString method. It’s also viewable through the Hadoop monitoring page.
+
+Narrow dependencies are faster than wide dependencies because it does not require shuffling data between working nodes.
+
+reduceByKey, groupByKey will have narrow dependencies if the upstream RDD is already partitioned by key.
+
+Since Spark avoids heavy disk i/o, it significantly improves the performance (relative to Hadoop).
+
+Spark outperforms Hadoop in iterative programs because it tries to keep the data that will be used again in the next iteration in memory. In contrast, Hadoop always read and write from/to disk.
+
+Hadoop’s original limitation is that it can only run MapReduce.
+
+Question
+
+What if we want to run other distributed frameworks?
+
+YARN = Yet-Another-Resource-Negotiator
+
+Provides an API to develop any generic distributed application. Handles scheduling and resource request. (MR2) is one such application in YARN.
+
+The Job tracker in Hadoop v1.0 was specific to Hadoop jobs. But the resource manager in v2.0 can support different types of jobs (Hadoop, Spark, etc.).
+
+Spark architecture has a driver program, cluster manager, and Worker Nodes.
+
+
+Worker Node
+Worker Node
+Driver Program
+Executor
+Executor
+SparkContext
+Cluster Manager
+There are multiple tasks per executor.
+
+Question
+
+Why is this important?
+
+To work, the Spark driver must send relevant code to run each task.
+
+
+thresh = 5
+myRdd.map(lambda x: x >= thresh)
+The lambda captures thresh, so it gets packaged up too.
+
+If you Broadcast a value, then Spark only sends one copy per Executor (worker machine) not per Task.
+
+
+thresh = sc.broadcast(5)
+myRdd.filter(lambda x : x > thresh.value)
+Constant means constant, Broadcast variables are read-only
+
+
+thresh = sc.broadcast(5)
+thresh.value = 6
+# Error value is not assignable
+It’s possible to make a broadcast variable where the value is a mutable type. This will work (in that it won’t give you the above errors), but it won’t work in that each worker has its own copy of this value, so if one of them updates a dictionary, the other workers don’t see that.
+
+Lecture 7
+Question
+
+A Broadcast variable carries information from Driver to Executor. What if we want communication from Executor back to the Driver?
+
+Accumulator.
+
+
+lineCounter = sc.accumulator(0)
+ 
+def split_and_count(line):
+	lineCounter.add(1)
+	return line.split()
+ 
+myRdd.map(split_and_count) 
+linecounter.value()
+
+val lineCounter = sc.longAccumulator
+ 
+def split_and_count(line : String) = { 
+	lineCounter.add(1)
+	line.split()
+}
+ 
+myRdd.map(split_and_count)
+lineCounter.value
+There are different types of accumulators (longAccumulator, doubleAccumulator)
+
+By default, Spark shuffles use a hash partitioner, or sometimes a range partitioner (for sorting).
+
+Ranger partitioner: Workers gather statistics on their key distributions then heuristics attempt to divide the keys into ranges of approximately-equal sizes.
+
+
+ 
+class myPartitioner(override val numPartitions : Int) {
+	def getPartition(key : Any) : Int = key match {
+		case x : Int => logic % numPartitions
+		case _ => throw
+	}
+}
+ 
+rdd.reduceByKey(new myPartitioner(5), _+_)
+The equal function lets Spark know whether two partitions are equivalent. Scala makes little distinction between val fields and zero-argument methods so we can override
+
+
+abstract numPartitions(): Int
+with
+
+
+val numPartitions: Int
+PySpark doesn’t use Partitioner objects, just a partition function.
+
+Avoid groupByKey if you can, MapReduce in Spark without a combiner is essentially flatMap → groupByKey → flatMap. We are trying to do better than MapReduce.
+
+Reduce (MapReduce)
+
+(K 
+2
+​
+ ,V 
+2
+​
+ )→ List[K 
+3
+​
+ ,V 
+3
+​
+ ]
+KVP are partitioned and shuffled by Partitioner
+Reduce job calls reduce on keys in sorted order
+reduceByKey (Spark)
+
+V→V
+RDD[(K,V)]→ RDD[(K,V)]
+Less flexible, but does what reduce should normally be used for
+Reduces before shuffle (combiner)
+Reduces after shuffle (reducer)
+combineByKey gives more fine-grained control than reduceByKey
+
+RDD[(K,V)].combineByKey(create, append, merge) → RDD[(K,C)]
+
+Create - make a C from a V
+Append - take a C and add a V to it
+Merge - combine two C
+reduceByKey(reduce) calls combineByKey(identity, reduce, reduce)
+
+Question
+
+What is C?
+
+In CS135 we called these variables accumulators. Spark calls them collectors.
+
+aggregateByKey is between reduceByKey and combineByKey
+
+RDD[(K,V)].aggregateByKey(zero, append, merge) → RDD[(K,C)]
+
+Zero - initial value [Type C]
+Append - take C and add a V to it
+Merge - combine two C
+Instead of initialize function, there is a “zero” value provided. The Collector is initialized by appending the first value encountered into the zero value.
+
+In Scala, the function has been partially curried, converted from one function with 3 parameters into a function with one parameter that returns a second function with two.
+
+Instead of calling it as myRdd.aggregateByKey(zero, append, merge), you call it as myRDD.aggregateByKey(zero)(append, merge).
+
+Question
+
+Why?
+
+Type inference is done simultaneously for all parameters so it’s not possible for it to infer what type C is from the zero value and use that to infer types for append / merge.
+
+Python doesn’t need this as it is dynamically typed.
+
+Spark’s reduceByKey is not like the reduce phase of MapReduce.
+
+reduceByKey partitions the RDD, then reduces each partition, then shuffles for a final reduce. Repartition triggers shuffling but it gives moire balanced partitions. It can be used to increase or decrease the number of partitions. Coalesce can be used to only reduce the number of partitions. It avoids full shuffling so it is faster than repartition but it may give unbalanced partitions.
+
+
+sc.textFile("movies.csv").
+	map(_.split(",")).
+	map(list => (list(1).toInt, (lst(2).toDouble, 1))).
+	reduceByKey({case ((s1, c1), (s2, c2)) => 
+						(s1 + s2, c1 + c2)}).
+	mapValues({case (sum, cnt) => 
+					sum / cnt}).
+	coalesce(1).
+	saveAsTextFile("averages")
+
+sc.textFile("movies.csv").\
+	map(lambda line: line.split(",")).\
+	map(lambda lst:
+		(int(lst[1]), (float(lst[2]), 1))).\
+	reduceByKey(lambda p1, p2:
+		(p1[0] + p2[0], p1[1] + p2[1])).\
+	mapValues(lambda pair: pair[0] / pair[1]).\
+	coalesce(1).\
+	saveAsTextFile("averages")
+Text file loaded and partitioned
+Map is applied to existing partitions (split the lines)
+Map is applied to existing partitions (extract useful fields)
+reduceByKey triggers a repartition based on the keys
+Map is applied to the new partitions (convert (sum, count) to sum / count)
+Coalesce merges data into 1 partition
+Next Module: Analyzing Text (Language models, natural language processing, information retrieval / search)
+
+We start with analyzing text.
+
+P(w 
+1
+​
+ ,w 
+2
+​
+ ,…,w 
+k
+​
+ ) is the probability of encountering the sentence w 
+1
+​
+ w 
+2
+​
+ …w 
+k
+​
+ 
+
+Question
+
+What good is this?
+
+Machine Translation
+P(High winds expected)>P(Large winds expected)
+Spell Checker that’s not fooled by homophones
+P(Waterloo is a great city)>P(Waterloo is a grate city)
+Speech Recognition
+P(I saw a van)>P(Eyes awe of an)
+We want to be able to take a sentence with k words, and assign a probability to it. This lets us rank alternatives.
+
+How LLMs work:
+
+Given w 
+1
+​
+ w 
+2
+​
+ …w 
+k−1
+​
+  obtain probability distribution for w 
+k
+​
+ 
+Sample word from distribution
+Repeat until you generate the special “stop” word
+The tricky part is generating the probability distribution. There are a lot of different sampling techniques to choose from.
+
+Lecture 8
+Probabilistic model
+
+P(w 
+1
+​
+ ,w 
+2
+​
+ ,…,w 
+k
+​
+ )
+​
+  
+=P(w 
+1
+​
+ )×P(w 
+2
+​
+ ,…,w 
+k
+​
+ ∣w 
+1
+​
+ )
+=P(w 
+1
+​
+ )×P(w 
+2
+​
+ ∣w 
+1
+​
+ )×…×P(w 
+k
+​
+ ∣w 
+1
+​
+ ,w 
+2
+​
+ ,…,w 
+k−1
+​
+ )
+​
+ 
+Chain rule - P(A,B)=P(B)×P(A∣B) ← similar to PMI
+
+Question
+
+Can we actually use this? Is this reasonable? How long is a typical sentence
+
+Short answer, no.
+
+The size of a sentence is unbounded. If we set the sentence length to max of 20, let’s say there are 100k commonly used English words, 100k 
+20
+ =10 
+100
+ 
+
+LLMs work this way, but they don’t actually base the conditional probability of the next token on ALL of the surrounding context.
+
+Smaller Limit: N-Gram
+
+Basic idea: Probability of next word only depends on the previous (N−1) words.
+
+P(w 
+k
+​
+ ∣w 
+1
+​
+ ,w 
+2
+​
+ ,…,w 
+k−1
+​
+ )≈P(w 
+k
+​
+ ∣w 
+k−N+1
+​
+ ,w 
+k−N+2
+​
+ ,…,w 
+k−1
+​
+ )
+
+N=1 : Unigram model - P(w 
+1
+​
+ ,w 
+2
+​
+ ,w 
+3
+​
+ ,…)=P(w 
+1
+​
+ )P(w 
+2
+​
+ )…P(w 
+k
+​
+ )
+
+N=2 : Bigram model - P(w 
+1
+​
+ ,w 
+2
+​
+ ,w 
+3
+​
+ ,…)=P(w 
+1
+​
+ )P(w 
+2
+​
+ ∣w 
+1
+​
+ )…P(w 
+k
+​
+ ∣w 
+k−1
+​
+ )
+
+Google uses N-Grams for suggestions (N is small).
+
+We can do this with Hadoop.
+
+Unigram: P(w)=C(w)/N
+Bigram: P(w 
+i
+​
+ ,w 
+j
+​
+ )=C(w 
+i
+​
+ ,w 
+j
+​
+ )/N. P(w 
+j
+​
+ ∣w 
+i
+​
+ )=P(w 
+i
+​
+ ,w 
+j
+​
+ )/P(w 
+i
+​
+ )=C(w 
+i
+​
+ ,w 
+j
+​
+ )/C(w 
+i
+​
+ )
+Example
+
+Bigrams
+
+
+# I am Sam $
+# Sam I am $
+# I do not like green eggs and ham $
+Counts	Probabilities
+(#,I)=2	P(I∥#)=2/3
+(#,Sam)=1	P(Sam∥#)=1/3
+(I,am)=2	P(am∥I)=2/3
+P( | Sam)=1/2
+The probability P(a∣b)+C(b,a)/C(b, 
+∗
+ ).
+
+Recall that C(b, 
+∗
+ ) means count of all pairs that start with b.
+
+Example
+
+Bigrams
+
+
+P(I like ham)
+= P(I | #) P(like | I) P(ham | like) P($ | ham)
+= 0
+P(s)=0 means sentence s is impossible. This is not true (probably).
+
+If a single n-gram in the sentence has never been seen, P=0.
+
+Just one unusual word takes a sentence from “likely” to “impossible”. That’s a “discontinuity”.
+
+Removing 0s makes the distribution “smooth”.
+
+Question
+
+How can we remove 0s?
+
+Laplace Smoothing
+
+Start each count at 1, not 0.
+
+Laplace smoothing (bigram probabilities)
+
+P(A,B)= 
+N
+C(A,B)
+​
+ →P 
+L
+​
+ (A,B)= 
+N+V 
+2
+ 
+C(A,B)+1
+​
+ 
+​
+ 
+Question
+
+What is V?
+
+Vocabulary size. Since every pair of words (A,B) has a +1, we need to add V 
+2
+  to N.
+
+Question
+
+Shouldn’t it be V(V−1)?
+
+No, for A 
+1
+​
+ +A 
+2
+​
+  cooccurrence we did not count the pair (X,X), but for bigrams we do.
+
+Other smoothing techniques
+
+Good-Turing - Used by Good and Turing as part of cracking enigma
+Katz backoff - “backoff” means if n-grams and unigrams
+P 
+JM
+​
+ (A,B)=λP(A,B)+(1−λ)P(A)P(B)
+Dirichlet Smoothing, Witten-Bell - ways to pick λ
+Kneser-Ney - current best practice
+Google used to use this for Google Translate.
+Hidden Markov Model (HMM) is used a lot in NLP.
+
+Transformers
+
+Question
+
+ChatGPT can do 8k, 16k, even 64k context, how is it not all zeroes?
+
+It is a transformer neural network, not a table of n-gram counters. Words will have latent probability - no smoothing ended.
+
+Self-attention in a context of 4000 words, only some words are important.
+
+Topic Shift: Searching (Information Retrieval)
+
+The central problem in search. Query terms and document terms should match, but language is hard.
+
+Abstract IR architecture
+
+
+offline
+online
+Query Representation
+Document Representation
+Index
+Representation Function
+Comparison Function
+Representation Function
+Query
+Hits
+Documents
+Representation matters. Computers can’t understand, we need to tell them what relevant means. Assumption: terms are independent, relevance is irrelevant, the concept of a “word” is well defined.
+
+We will stick to English words. The tokenizer will remove punctuation, and the case folding will treat things as lowercase and put unicode into canonical form.
+
+A representation is often called an embedding. You take a high dimensional object, and embed it in a lower-dimensional plane.
+
+The distance between embeddings: cosine
+
+The distance between words: semantic similarity
+
+Goal for embeddings: D(e 
+1
+​
+ ,e 
+2
+​
+ )≈D(w 
+1
+​
+ ,w 
+2
+​
+ )
+
+PMI is a great way to estimate the semantic similarity of words. PMI gives similarity measures similar to cosine similarity. PMI =0⟹ terms are uncorrelated aka orthogonal. cos=0⟹ terms are uncorrelated aka orthogonal.
+
+Inverted index maps context to documents. Forward index maps documents to context.
+
+Scaling assumptions
+
+Queries are small
+Postings are not
+Vocabulary Size: Heap’s Law
+
+M=kT 
+b
+ 
+​
+ 
+M is vocabulary size, T is collection size (number of documents), k and b are constants.
+
+Typically, k is between 30 and 100, and b is between 0.4 and 0.6.
+
+Heap’s Law: Linear in log-log space.
+
+We can save space in our postings list by only storing the document numbers. This saves a lot of space since most terms do not appear in most documents.
+
+Postings Size: Zipf’s Law
+
+f(k;s,N)= 
+∑ 
+i=1
+n
+​
+ (1/n 
+s
+ )
+1/k 
+s
+ 
+​
+ 
+​
+ 
+N is number of elements, k is rank, s is characteristic exponent.
+
+Zipf’s Law: is also linear in log-log space.
+
+Few elements occur very frequently, many elements occur very infrequently.
+
+Lecture 9
+Map
+
+Input (docid: doctext)
+Output (term: (docid, freq))
+Can add metadata
+Reduce
+
+Input (term : Iterator[(docid, freq)])
+Output (term : Postings List)
+
+def map(docid: Long, doctext : String):
+	counts = Counter()
+	for term in tokenize(doctext):
+		counts.add(term)
+	for term, freq in counts:
+		emit(term, (docid, freq))
+We can assume each document has only a few million unique terms, so the counter will easily fit.
+
+
+def reduce(term: String, postings: Iterator[(Long)]):
+	p = list()
+	for docid, freq in postings:
+		p.append((docid,freq))
+	p.sort()
+	emit(term,p)
+How big does p get? Zipf’s law says usually small, sometimes not small. Sorting is O(nlogn) which is not ideal if n is large.
+
+Question
+
+Why not use Spark?
+
+You can. Map your tokenizer + wordcount to get (docid, Map[term,freq]) pairs. flatMap to get ((term, docID), freq) pairs. repartitionAndSortWithinPartitions to do the secondary sort pattern. mapPartitions to build postings list - logic is the same.
+
+Delta Compression: Zipf’s Law works for us now. If a term is rare, there are not many postings. If a term is common: The average delta (docid 
+i+1
+​
+ − docid 
+i
+​
+ ) is small
+
+If a sequence is ascending, you can instead write down only the delta between elements,
+
+This does not save anything if our output is int, but there exist other datatypes.
+
+Variable-width integer type (VInt). Uses 1-5 bytes to represent an Int (same range as 4 byte fixed width). VInt saves space when you have many packed together. ArrayWritable doesn’t pack them together.
+
+Question
+
+How many ways can we divide up 28 bits?
+
+Simple-9.
+
+Variable Length Quality (VLQ)
+
+How it works: Slice number into septets. Use high bit to indicate continues.
+
+Example
+
+767 → 0010 1111 1111 → 00001011111111 → 10000 101 0111 1111
+
+VInt (or VLong) works at the Byte level. What about the bit level?
+
+Elias γ code
+
+Assumptions:
+
+Natural numbers with no upper bound (like counts, for example)
+Small numbers are more common than large numbers
+Encoding x:
+
+Let N=⌊log 
+2
+​
+ x⌋
+Write N 0s
+Write x as an N+1 bit number
+Decoding x:
+
+Read 0s until a 1, call this N
+Interpret next N+1 bits as a binary number
+Including the 1
+This does well for term frequencies (how many times the term appears in the document). Does OK for gaps too.
+
+The Elias code assumes the values are distributed by a power law. Most numbers should be small, or it doesn’t save any space.
+
+Question
+
+What do you think the distribution of gaps looks like if you have N document IDs and a term that matches M documents?
+
+It is clearly a Poisson distribution (STAT231), with γ=M/N
+
+The overall DF can exceed N, and sampling is done with replacement.
+
+Golomb Code
+
+For encoding a positive integer x. Quotient and remainder when divided by M.
+
+q=(x−1)/M
+
+r=x−qM−1
+
+q gets encoded in unary (q 0s, then 1)
+
+r gets encoded in truncated binary.
+
+Let z
+M
+​
+  
+= 
+Number of total documents
+D
+​
+ 
+​
+ 
+D 
+r
+​
+ 
+​
+ 
+Number of documents containing term
+​
+ 
+​
+ 
+=⌈ 
+−log(1−z)
+log(2−z)
+​
+ ⌉
+​
+ 
+Each term gets its own custom encoding sheet.
+
+Truncated Binary:
+
+For numbers {0,1,…,n−1}:
+
+k=⌊log 
+2
+​
+ n⌋
+u=2 
+k+1
+ −n
+First u codewords: First u codes with length k.
+
+Last n−u codewords: Last n−u codes with length k+1.
+
+It is best to treat ID and frequency as independent.
+
+There is also an “Exponential Golomb Code” that uses an Elias Gamma code to write the quotient instead of using unary.
+
+Question
+
+MapReduce it?
+
+The indexing problem is good for MapReduce. Scalability is critical, must be fast, a batch operation, incremental updates might be important.
+
+MapReduce is not very good for the retrieval problem. Must have sub-second response time. However we still want to distribute it.
+
+Boolean Retrieval: Query is formed using Boolean operators (∧,∨,¬). Hits: set of documents for which the query is true.
+
+To execute a boolean query, build a syntax tree in Polish Notation (who said LeetCode wasn’t helpful).
+
+For each clause, look up postings.
+
+Traverse postings and apply Boolean operator.
+
+For each term, generate sets of documents.
+
+∧=∩
+∨=∪
+¬=¬
+Term-at-a-time: Compute one operation, take the result and carry it onwards.
+
+Document-at-a-time: For each document, see if it passes the query. Since documents are in sorted order, modified merge operation will work.
+
+Repeat: For the smallest “next doc” - does it match?
+
+Our index file is partitioned. We probably want to distribute lookup, even if it’s not a MapReduce task we use. Options:
+
+Leave the index partitioned by term
+Each index file has the complete collection for a subset of terms
+Repartition by document ID
+Each index file has a subset of the collection, but the index for all terms.
+Document indexing is much nicer.
+
+A set of hits is fine, but we probably want them to be sorted by relevance. That is a different problem: Ranked Retrieval.
+
+Requires: relevance function R(q,d)
+
+A query “X Y Z W” might yield a high Relevance value even if a document only contains terms “X” “Y” “W”.
+
+Ranked Retrieval: Simplify the query, not only a list of terms. Need a way to weight a hit.
+
+Question
+
+Can we just do Boolean Retrieval and then sort by relevance?
+
+No.
+
+Terms that occur many times in one document should have high weights for that document. Terms that occur in many times in the entire collection should have low weights.
+
+We need:
+
+Term frequency
+Document frequency
+Term Frequency and Inverse Document Frequency (TF-IDF)
+
+w 
+ij
+​
+ =tf 
+ij
+​
+ log 
+df 
+i
+​
+ 
+N
+​
+ 
+​
+ 
+w 
+ij
+​
+  - weight (relevance) of term i in document j
+tf 
+ij
+​
+  - number of occurrences of term i in document j
+df 
+i
+​
+  - number of documents containing term i
+N - total number of documents
+The relevance of a document is the sum of the w 
+i
+​
+  values.
+
+Document-At-a-Time:
+
+For each document:
+
+Score each query term, and add them all up
+Accumulate best k hits
+A min-heap is good for this
+PRO: Time is O(nlogk) memory is O(k) - k is probably a constant
+
+CON: Can’t terminate early, must look at a whole document collection.
+
+Term-At-a-Time:
+
+Collect hits and ranking for rarest term into accumulator
+For each other term in the query:
+If a document does not have that term, remove from accumulator
+Otherwise, add next term’s ranking to overall ranking
+PRO: Can have early termination heuristics, will not normally need to traverse all documents.
+
+CON: Uses a lot of memory.
+
+Lecture 10
+Question
+
+What is a graph?
+
+Same definition from CS341. G=(V,E) (set of vertices and edges).
+
+Direction:
+
+Undirected - edge (u,v) implied edge (v,u)
+Directed - edge (u,v) does not imply edge (v,u)
+Edges may or may not be labelled. Numerical labels are called weights.
+
+Most graphs are sparse. Number of edges is closer to ∣V∣ than it is to ∣V∣ 
+2
+ .
+
+In the past we have seen three representations:
+
+Adjacency matrix
+Adjacency list
+Edge list
+Adjacency Matrix: An n×n matrix M. M 
+ij
+​
+ =1 iff there is an edge between v 
+i
+​
+  and v 
+j
+​
+ .
+
+Pro:
+
+Useful for mathematical operations
+CUDA loves matrix operations
+Fast neighbourhood check (in and out)
+Cons:
+
+Mostly 0s in a sparse graph (wasted space)
+O(n) to find neighbourhood of v (in and out)
+Adjacency List: Row i is a list of the out-neighbours of vertex v 
+i
+​
+ . Now it is a stripe, with the key as the vertex label and value as the sparse adjacency vector.
+
+Pro:
+
+Smaller than the matrix
+Even easier to find out-neighbours of v
+Con:
+
+Difficult to find in-neighbours of v
+Have to search all other adjacency lists
+Edge List: Just a list of all of the edges.
+
+Pro:
+
+Easy to add an edge (just append)
+Simple
+Con:
+
+Hard to find neighbours
+Hard to find anything
+The web looks like 4.77 billion - 50 billion pages (vertices), and 100 billion - 1 trillion links (directed edges).
+
+This is big. Power laws again: P(k)∼k 
+−γ
+ .
+
+Lots of pages have 0 or 1 in-links. Fibonacci binning is like regular binning but the bin size increases by the Fibonacci sequence. Use this instead of linear binning for plotting in log-log space.
+
+The most common out-degree is 1.
+
+Many graph algorithms involve:
+
+Local computations for each node
+Propagating these results to neighbours
+Question
+
+Which representation fits the best?
+
+Adjacency list makes the most sense.
+
+Question
+
+How do the local computations work?
+
+Local computation means independent, sounds like a map-like task.
+
+Question
+
+How does the traversal work?
+
+The pairs are “messages”. The key is the intended recipient, the value is the content of the message. Propagation: Shuffle - collecting the propagated messages is reduce-like.
+
+It is reduce-like as sending messages to neighbours is a non-local computation. If we override the hash partitioner we can try to partition in such a way to minimize the number of inter-partition edges.
+
+Single-Source Shortest Path
+
+Problem: Find the shortest path from a single node (source) to all other nodes. Shortest might mean fewest links, or lowest total weight.
+
+Dijkstra’s Algorithm (again)
+
+Step 1:
+
+Set all nodes as unvisited, with D=∞
+Set source node’s D to 0
+Step 2:
+
+Let v be the unvisited node with lowest distance
+For all out-neighbours u of v:
+D[u]=min(D[u],D[v]+edge(v,u).weight)
+Instead of Dijkstra on MapReduce (it is not parallel because the minimum D is not local), we do parallel breadth-first search (pBFS).
+
+Simple case - unweighted graph.
+
+We want the fewest “hops” from source to destination.
+
+Inductive definition:
+
+dist(s)=0
+dist(v)=1 if there is an edge from s to v
+dist(v)=1+min 
+i
+​
+ (dist(u))
+Implementation on Hadoop
+
+Keys - Node n
+
+Values - (d - distance to n, adjacency list of n)
+
+Mapper:
+
+for m in adjacency list, emit (m:d+1)
+also emit (n:d)
+Reducer:
+
+Update distance to node n based on (m:dist) messages from mapper
+To iterate, the output of the reducer gets passed to another (identical) job as the input.
+
+But we also need to emit the adjacency list.
+
+
+def map(id, node):
+	emit(id, node)
+	for m in node.adjList:
+		emit(m, node.d + 1)
+ 
+def reduce(id, values):
+	d = float("inf")
+	node = None
+	for o in values:
+		if isNode(o):
+			node = o
+		else:
+			d = min(d,o)
+	node.d = min(node.d, d)
+	emit(id, node)
+Node is a Writable object with 2 fields:
+
+d - distanceFromSource
+adjList - list of IDs for the out-neighbours of the node
+With Hadoop MapReduce, the Value type can be ObjectWritable, and you can use reflection to see what kind of object it actually is.
+
+Improvement: A “last updated” field - in iteration k, if id node was not last updated in iteration k−1, do not emit messages from the mapper.
+
+The most important part of recursion is knowing when to stop. The second most important part of recursion is knowing when to stop.
+
+Question
+
+When should this iteration stop?
+
+If no node’s distance gets updated, then the next iteration will send the same messages.
+
+All the nodes with min distance of k are “visited” in iteration k.
+
+Pseudocode with weighted edges
+
+
+def map(id, node):
+	emit(id, node)
+	for m in node.adjList:
+		emit(m.id, node.d +m.w)
+ 
+def reduce(id, values):
+	d = float("inf")
+	node = None
+	for o in values:
+		if isNode(o):
+			node = o
+		else:
+			d = min(d,o)
+	node.d = min(node.d, d)
+	emit(id, node)
+You can still update a node after you first discover it (fuzzy frontier). Stopping condition is unchanged. Stop when there are no more changes. The number of iterations ended for an unweighted graph is the length of the longest “shortest” path. For a weighted graph, it is the length of the longest cycle-free path.
+
+Dijkstra only investigates the lowest-cost node on the frontier. Parallel BFS investigate all paths in parallel. It’s a simple optimization to restrict the frontier. But we still need to send the adjacency list back and forth,
+
+The issue with MapReduce iteration is that everything is written to HDFS, then loaded again. We must send the entire graph structure to the reducers each iteration, only to have them send it back again.
+
+MapReduce
+
+
+HDFS
+HDFS
+map
+reduce
+Spark
+
+
+Adjacency Lists
+Start Node
+join
+flatMap
+reduceByKey
+Updated Nodes
+Stop?
+HDFS
+Although there are two reduce-like transformations (join and reduceByKey) they have the same keys so there will be narrow dependencies. Conceptually, each node receives here’s your best path, and then announces this to its neighbours.
+
+Web contains many sources of truth. Who do we know to trust? Not all web pages are equally important. There is large diversity in the web-graph node connectivity. We can rank the pages by the link structure.
+
+PageRank: The “Flow” Formulation
+
+Idea: Links as votes. Page is more important if it has more links. Think of in-links as votes.
+
+Not all in-links are equal. Links from important pages count more. This is a recursive question.
+
+Each link’s vote is proportional to the importance of its source page. If page j with importance r 
+j
+​
+  has n out-links, each link gets r 
+j
+​
+ /n votes. Page j‘s own importance is the sum of the votes on its in-links.
+
+We define a rank r 
+j
+​
+  for page j to be
+
+r 
+j
+​
+ = 
+i→j
+∑
+​
+  
+d 
+i
+​
+ 
+r 
+i
+​
+ 
+​
+ d 
+i
+​
+ …out-degree of node i
+​
+ 
+Flow equations:
+
+r 
+y
+​
+ 
+r 
+a
+​
+ 
+r 
+m
+​
+ 
+​
+  
+=r 
+y
+​
+ /2+r 
+a
+​
+ /2
+=r 
+y
+​
+ /2+r 
+m
+​
+ 
+=r 
+a
+​
+ /2
+​
+ 
+3 equations, 3 unknowns, no constants. There is no unique solution, all solutions equivalent modulo to the scale factor.
+
+Additional constraint forces uniqueness:
+
+r 
+y
+​
+ +r 
+a
+​
+ +r 
+m
+​
+ =1
+Solution r 
+y
+​
+ = 
+5
+2
+​
+ ,r 
+a
+​
+ = 
+5
+2
+​
+ ,r 
+m
+​
+ = 
+5
+1
+​
+ 
+Gaussian elimination method works for small examples, but we need a better method for large web-size graphs. Need a new formulation.
+
+Stochastic adjacency matrix M. Let page i have d 
+i
+​
+  out-links.
+
+If i→j, then M 
+ji
+​
+ = 
+d 
+i
+​
+ 
+1
+​
+  else M 
+ij
+​
+ =0.
+
+M is a column stochastic matrix, where the columns sum to 1.
+
+y	a	m
+y	1/2	1/2	0
+a	1/2	0	1
+m	0	1/2	0
+Question
+
+How do we solve this?
+
+Power iteration:
+
+Set r 
+j
+​
+ =1/N
+r 
+j
+′
+​
+ =∑ 
+i→j
+​
+  
+d 
+i
+​
+ 
+r 
+i
+​
+ 
+​
+ 
+r=r 
+′
+ 
+Goto to second line
+Example:
+
+​
+  
+r 
+y
+​
+ 
+r 
+a
+​
+ 
+r 
+m
+​
+ 
+​
+  
+​
+ = 
+1/3
+1/3
+1/3
+​
+  
+1/3
+3/6
+1/6
+​
+  
+5/12
+1/3
+3/12
+​
+  
+9/24…6/15
+11/24…6/15
+1/6…3/15
+​
+ 
+​
+ 
+Random walk interpretation
+
+Imagine a random web surfer. At any time t, surfer is on some page i. At time t+1, the surfer follows an out-link from i uniformly at random. Ends up on some page j linked from i. Process repeats indefinitely.
+
+There is not actually a random walker. We construct a distribution of what page the random walker may be on.
+
+Let p(t)… vector whose ith coordinate is the probability that the surfer is at page i at time t. So p(t) is a probability distribution over pages.
+
+Question
+
+Where is the surfer at time t+1?
+
+Follows a link uniformly at random : p(t+1)=M⋅p(t)
+
+Suppose the random walk reaches a state p(t+1)=M⋅p(t)=p(t), then p(t) is stationary distribution of a random walk.
+
+For graphs that satisfy certain conditions, the stationary distribution is unique and eventually will be reached no matter what the initial probability distribution at time t=0.
+
+A graph is ergodic if there exists a distribution π such that for all initial distributions p 
+0
+​
+ lim 
+t→∞
+​
+ p 
+t
+​
+ =π
+
+Question
+
+What is required to be ergodic?
+
+It must be connected and not bi-partite. Connected is obvious, not bi-partite is less obvious.
+
+In an ergodic graph, no matter the initial distribution, a random walk will always converge on a unique stationary distribution.
+
+Necessary and sufficient conditions:
+
+The graph must be connected
+The graph must be vertex aperiodic
+∀v the length of all cycles involving v must have a GCD of 1
+PageRank: Three questions
+
+r 
+j
+(t+1)
+​
+ = 
+i→j
+∑
+​
+  
+d 
+i
+​
+ 
+r 
+i
+(t)
+​
+ 
+​
+ 
+​
+ 
+Question
+
+Does this converge?
+
+It does not converge in the simple bipartite connected graph with two vertices. In a bi-partite graph, the two partitions will have X, 1−X as their total importance in the initial distribution, and will vacillate between (X,1−X) and (1−X,X). That’s because each node in partition 1 will send all of its importance to partition 2, and vice versa.
+
+In terms of a single walk, instead of a probability distribution, the walker will alternate between which partition they are in.
+
+Question
+
+Does it converge to what we want?
+
+No it doesn’t.
+
+Lecture 11
+PageRank Problems:
+
+Some pages are dead ends (have no out-links). Random walk has “nowhere” to go to. Such pages cause importance to leak out. Not connected ⟹ not ergodic.
+
+Spider traps (all out-links are within the group). Random walker gets stuck in a trap, and eventually the spider trap absorb all importance. Not connected ⟹ not ergodic.
+
+Solution: Teleports
+
+The Google solution for spider traps: At each time step, the random surfer has two options.
+
+With probability β, follow a link at random
+With probability (1−β), jump to some random page
+Common values for β are in the range 0.8 to 0.9
+Surfer will teleport out of spider trap within a few time steps.
+
+Solution: Always Teleport
+
+Teleports: Follow random teleport links with probability 1.0 from dead-ends. Adjust matrix accordingly.
+
+Question
+
+Why Teleports solve the problem?
+
+Why are dead-ends and spider traps a problem, and why do teleports solve the problem?
+
+Spider-traps are not a problem, but with traps, PageRank scores are not what we want. Solution: Never get stuck in a spider trap by teleporting out of it in a finite number of steps.
+
+Dead-ends are a problem. The matrix is not column stochastic, so our initial assumptions are not met. Solution: Make matrix column stochastic by always teleporting when there is nowhere else to go.
+
+Solution: Random Teleports
+
+Google’s solution that does it all. At each step, random surfer has two options. With probability β, follow a link at random. With probability 1−β, jump to some random page.
+
+PageRank equation [Brin-Page, 98]
+
+r 
+j
+​
+ = 
+i→j
+∑
+​
+ β 
+d 
+i
+​
+ 
+r 
+i
+​
+ 
+​
+ +(1−β) 
+N
+1
+​
+ 
+​
+ 
+​
+ 
+This formulation assumes that M has no dead ends. We can either preprocess matrix M to remove all dead ends or explicitly follow random teleport links with probability 1.0 from dead-ends.
+
+PageRank with MapReduce: No random jumps and no dead-ends.
+
+Map Phase - Each node “sends” its importance to its out-links.
+
+Reduce Phase - Each node sets its new importance to the sum of the received values.
+
+
+def map(id, n):
+	emit(id, n)
+	p = n.rank / len(n.adj)
+	for m in n.adj:
+		emit(m,p)
+ 
+def reduce(id, msgs):
+	n = None
+	sum = 0
+	for o in msgs:
+		if o is Node:
+			n = o
+		else:
+			s += o
+	n.rank = s
+	emit(id, n)
+PageRank	BFS
+Map	PR/N	d+1
+Reduce	∑	min
+Missing two things:
+
+Random jumps (1−β)
+Dead End Jumps (always)
+Question
+
+How can we add these?
+
+Every node has the same chance of jumping: 1−β
+
+If it jumps, it jumps to any random page (1/N for a particular page). Only need to change reducer side.
+
+New reducer
+
+
+def reduce(id, msgs):
+	n = None
+	sum = 0
+	for o in msgs:
+		if o is Node:
+			n = o
+		else:
+			s += o
+	n.rank = s * β + (1 - β) / N
+	emit(id, n)
+Dead-ends send all their weight everywhere, instead of only some of it.
+
+Option 1: Replace dead-ends with “links to everyone, everywhere” (no changes to the code, a lot of messages)
+
+Option 2: Post-process to redistribute “missing mass” (avoids making N-degree nodes)
+
+Option 1 is really bad.
+
+Post-Processing
+
+R = sum of all ranks
+1−R = missing mass
+Add (1−R)/N to all nodes.
+
+This is easy with Spark, we can use a double accumulator.
+
+We have to do an extra pass. Map (send mass) → Reduce (compute new mass) → Map (add missing mass)
+
+Or, we can do Map (add missing mass and then send mass) → Reduce (compute new mass).
+
+Only need one extra map as the final step. After iteration finished, add missing mass one last time. Or, we can just leave it missing. If dead ends have lost some mass, we’re just spreading that evenly across all nodes. This won’t change rankings.
+
+You can move the “post processing” map into the “next map”.
+
+Alternative is that mappers can send:
+
+node.rank divided evenly amount of out-links
+special case: dead-ends send entire rank to “everyone”
+Reducer adds (1/N)× “everyone” rank to each sum.
+
+However, you must send one everyone per reducer per node. That’s a lot of messages.
+
+How do we send to all reducers?
+
+
+for i in range(numReducers):
+	emit(EVERYONE, (i, missingMass))
+Partitioner, if key is EVERYONE, will send this to reducer i.
+
+Small problem: N=1 billion. The individual masses will be small. Solution: store the logs.
+
+Log Masses
+
+​
+  
+a=logm,b=logn
+m×n→a+b
+m+n→{ 
+b+log(1+e 
+a−b
+ )
+a+log(1+e 
+b−a
+ )
+​
+  
+a<b
+a≥b
+​
+ 
+​
+ 
+Ranks are in [0,1].
+
+Mathematically, ≈1/4 of all float values are also in this range.
+
+It also lets us store much smaller numbers without underflow. Most pages will have a very small but non-zero PageRank so this is important.
+
+Problems with MapReduce
+
+Sending adjacency list with each iteration
+Needless shuffling
+Needless filesystem access
+Verbose programs
+Each iteration is a new job
+So we go to Spark.
+
+Old Search Ranking - TF and DF and logarithms.
+
+Flaw: Term Spam
+
+Solution is to trust what others say about you, now what you say about yourself. Use link text and surrounding text as terms instead of contents of the page.
+
+Another problem is forum spam / comment spam. Going to every page that allows posting and adding a link to your webpage. Since they have a high rank ⟹ you will have a high rank.
+
+Spam Farming Techniques
+
+Spider traps accumulate rank. Random jumps prevent them from accumulating all ranks, but it’s still boosted by the topology.
+
+Technique:
+
+Page you want to promote has millions of hidden links to farm pages
+Farm pages all link back to the page you want to promote
+​
+  
+x:total contribution of accessible pages to t
+y: page rank of t (boosted page)
+z: page rank of a farm page
+z= 
+M
+βy
+​
+ + 
+N
+α
+​
+ 
+y=x+Mβz+ 
+N
+α
+​
+ 
+y=x+Mβ[ 
+M
+βy
+​
+ + 
+N
+α
+​
+ ]+ 
+N
+α
+​
+ 
+y= 
+1−β 
+2
+ 
+x
+​
+ + 
+(1+β)N
+βM
+​
+ 
+​
+ 
+Random jumps mean that the spider trap gets incoming rank even with no external links. The more websites you can insert links into, the better.
+
+Solution to link spam - ignore links tagged as “nofollow”. Convince forums, news sites, etc. to insert “nofollow” to all links posted in comments.
+
+Added benefit: A researcher can link to a page and not boost its ranking. When x=0, this is not solved. The rank is directly proportional to M.
+
+How do we solve the link farm problem.
+
+Idea: Collect a sampling of webpages (seed pages). Oracle (Human) sorts the trustworthy from the spam. This is expensive, keep the set as small as possible.
+
+Use the “good” pages as the source nodes for personalized page rank.
+
+Small change: Each page in trust set is initialized to 1: Trust sums to M instead of to 1.
+
+After iteration, all pages have a trust factor of between 0 and 1. Pick a threshold and mark all pages below that as spam.
+
+Trustworthy pages mostly only link to other trustworthy pages. Spam pages mostly only link to other spam pages. By only teleporting to known good pages, only the “good” partition accumulates significant trust.
+
+The more seed pages there are, the most time and effort needed to curate. The fewer seed pages, the less trust there is in the system.
+
+Need to pick seed pages that are highly likely to point to “most” of the other good pages.
+
+Bootstrapping trust: If your seed set is small, will miss a lot of trustworthy sites. But, anything that you find is probably pretty trustworthy.
+
+Run PageRank
+Select top pages as seed
+Run TrustRank
+Set threshold low enough to avoid false positives
+Remove spam pages from graph
+Goto Step 1
+Alternative - Spam Mass
+
+r 
+p
+​
+  = PageRank of Page p
+
+r 
+p
++
+​
+  = PageRank of Page p, but random jumps only lead to Trusted pages
+
+r 
+p
+−
+​
+ =r 
+p
+​
+ −r 
+p
++
+​
+  = Contribution of “low trust” pages to p‘s rank
+
+S 
+p
+​
+ = 
+r 
+p
+​
+ 
+r 
+p
+−
+​
+ 
+​
+  = Spam Mass (fraction of p‘s rank that’s from low trust pages)
+
+The higher your Spam mass, the more likely you are to be spam.
+
+Topics also matter. Instead of the teleport set being all pages, it’s all pages on a given topic T.
+
+Lecture 12
+Data Mining
+
+Analyzing a large dataset in order to gain actionable insights (whatever this means).
+
+Supervised Machine Learning
+
+Classification Functions:
+
+Input: Object
+Output: Label(s)
+In supervised machine learning, you provide a training set, where emails have been classified as “SPAM” or not, then math happens, and out comes a model that can classify things.
+
+Objects are represented as a vector of features:
+
+Dense features: Sender IP, timestamp, etc.
+Sparse features: Subject contains “URGENT”, etc.
+For the same object, each application will have its own set of features. Selecting good features is important.
+
+An embedding is obtained by machine learning.
+
+Example
+
+word2vec converts a word to a 348 dimension vector
+
+Goal: King - Man + Woman ≈ Queen
+
+LLMs train the embedding (encoder/decoder) as well as the language model concurrently or alternating. Diffusers like StableDiffusion do as well.
+
+An embedding is a specific kind of dense feature vector. One where each dimension is NOT a distinct feature, but one where the vector was learned by some kind of Deep Learning model.
+
+ML solutions look like:
+
+Acquire data (clean it)
+Label data (by hand)
+Determine features
+Pick an architecture
+Train the model
+Repeat as needed
+There are many architectures. Naïve Bayes, Logistic regression, SVM, Random Forest, Neural Networks etc.
+
+Simple Spam Filter (Idiot’s Spam Filter)
+
+Put emails 1 per line in a text file, with SPAM/NOT label
+Do a modified word count (keep two counts)
+Do some math
+P(spam) =N 
+s
+​
+ /N
+P(w) =C(w)/N
+P(w | spam) = C 
+s
+​
+ (w)/N 
+s
+​
+ 
+Bayes’ Theorem: P(spam | w) = P(spam) P(w | spam) / P(w)
+Acquiring high quality, clean, and labelled data is the most important part.
+
+To label by hand at scale, need to crowdsource, bootstrap, exploit user behaviours.
+
+Binary classification: Label is a single binary value. Yes or no. Spam or Not Spam.
+
+You can make more nuanced classifiers out of binary classifiers.
+
+We can use binary classifiers to create a classifier tree, if the labels are not mutually exclusive.
+
+Binary Classifier Cascades aren’t the only sort of AI.
+
+Training a classifier
+
+D={(x 
+i
+​
+ ,y 
+i
+​
+ )}. D : Training data, x 
+i
+​
+  : feature vector, y 
+i
+​
+  : label
+
+We want to find f:X→Y. A function that maps feature vectors to labels
+
+But not any f, an f that minimizes “entropy” or “loss”).
+
+n
+1
+​
+  
+i=1
+∑
+n
+​
+ ℓ(f(x 
+i
+​
+ ),Y 
+i
+​
+ )where ℓ is a loss function
+​
+ 
+Parameterization. There are lots of functions, we’d rather have a parameterized function
+
+arg 
+θ
+min
+​
+  
+n
+1
+​
+  
+i=0
+∑
+n
+​
+ ℓ(f(x 
+i
+​
+ ;θ),y 
+i
+​
+ )
+​
+ 
+or
+
+L(θ)= 
+n
+1
+​
+  
+i=0
+∑
+n
+​
+ ℓ(f(x 
+i
+​
+ ;θ),y 
+i
+​
+ )
+​
+ 
+and we are trying to find argmin L(θ).
+
+There probably isn’t a closed form solution to this so we use gradient descent.
+
+Remember Newton’s Iteration.
+
+Get the slope at point x 
+n
+​
+ 
+Compute the intercept for the tangent line at point x 
+n
+​
+ , call it x 
+n+1
+​
+ 
+Repeat
+Gradient descent is the same thing, it just has many dimensions not just x.
+
+For each component x of θ:
+
+Compute  
+∂x
+∂
+​
+ L
+Compute “downhill” (like Newton’s Method with many dimensions)
+Compute new θ
+To find argmin 
+θ
+​
+ L(θ)
+
+Compute Gradient :∇L(θ)=[ 
+∂w 
+0
+​
+ 
+∂L
+​
+ , 
+∂w 
+1
+​
+ 
+∂L
+​
+ ,…, 
+∂w 
+d
+​
+ 
+∂L
+​
+ ]
+​
+ 
+So at any point θ, θ 
+′
+ =θ−γ∇L(θ)
+
+Gamma is our step (learning rate), or how far we move along the gradient. L(θ)≥L(θ 
+′
+ ).
+
+This inequality is for sufficiently small gamma.
+
+Gradient descent is first order. It has local linear approximations and slow convergence. To avoid local minima we need momentum, stochastic gradient descent (randomly selecting a subset of training data). Can still get stuck.
+
+Boolean Classifiers
+
+f(X∣W):R 
+d
+ →{0,1}
+​
+ 
+The parameters to optimize are the weight vector W. θ is used as the abstract view of “The Model”, vector W is the concrete realization.
+
+Loss
+
+f(X;W):R 
+d
+ →{0,1}
+ℓ(y,t)= 
+2
+1
+​
+ (y−t) 
+2
+ 
+​
+ 
+Loss is 0 if prediction is right, 1 if prediction is wrong.
+
+Problem: Not continuous, not differentiable. Gradient descent doesn’t work.
+
+Solution is a surrogate loss function.
+
+Linear function
+
+f(X;W,b):R 
+d
+ →R=W⋅x+b
+ℓ(y,t)= 
+2
+1
+​
+ (y−t) 
+2
+ 
+​
+ 
+Where y is the predicted value, t is the true value.
+
+The cost is unbounded.
+
+Sigmoidal functions are nice
+
+f(X;W):R 
+d
+ →[0,1]=σ(w⋅x)
+ℓ(y,t)= 
+2
+1
+​
+ (y−t) 
+2
+ 
+σ(z)= 
+e 
+z
+ +1
+e 
+z
+ 
+​
+ 
+​
+ 
+Prediction is between 0 and 1. Loss is between 0 and 1.
+
+Continuous and differentiable:  
+dz
+d
+​
+ σ(z)=σ(z)(1−σ(z)).
+
+∂z
+∂L
+​
+ =(y−t)y(1−y)
+∂w 
+i
+​
+ 
+∂L
+​
+ =(y−t)y(1−y)x 
+i
+​
+ 
+​
+ 
+Now we can do gradient descent.
+
+A better loss function to use here is Binary Cross Entropy (BCE).
+
+ℓ(y,t)=−[tlogy+(1−t)log(1−y)]
+​
+ 
+Giving the gradient
+
+∇L(W)=(t−y)X
+​
+ 
+Lecture 13
+Gradient Descent on Hadoop
+
+MapReduce is bad at iteration. Gradient descent must have only one reducer (bottleneck).
+
+Spark to the rescue.
+
+
+val points = spark.TextFile(...).map(...).cache()
+var w = ... // initial reaction
+for (i = 1 to Iterations) {
+	val gradient = points.map{ p => {
+		val score = p.x * w
+		val y = 1 / (1 + exp(-score)
+		p.x * (p.y - y)}}.reduce((a,b) => a+b)
+	w -= gradient * LR
+}	
+This is really better. We cache data, no shuffles, driver only does one final reduce.
+
+Stochastic Gradient Descent
+
+Pick a random subset, only compute gradient for that subset of values. If the subset is small enough for one machine … why have the cluster?
+
+If we have k mappers. Have each compute the gradient for its subset, then transform independently?
+
+Ensemble Learning
+
+Train multiple independent models
+Combine predictions
+Voting
+Merging models
+You can’t always merge models, but for a simple linear / sigmoidal classifier function, averaging the weights is probably okay.
+
+Other kinds of models are not so easily merged. You can merge neural networks sometimes if they’re all finetunes of the same base model.
+
+Ensemble learning works because errors won’t be correlated, less likely that most models are all wrong, reduced variance.
+
+Online stochastic gradient descent as ensemble. We select elements in random order and compute the gradient one training value at a time.
+
+In MapReduce, each mapper holds the current parameter set in memory. Trains model by computing gradient for one element, updating parameters (in map).
+
+If we only want one model, the mappers become parsers. The reducer becomes the learner by creating the model, training the model, and emitting the model. No more ensemble learning.
+
+In Spark, we can do model = LogisticRegressionWithSGD(data, iterations, step)
+
+How do we evaluate the model? It’s not enough to minimize loss. Loss is a measure of how closely it matches the training data. An overfitted model can have 0 loss, but still be useless.
+
+If there is too much training ⟹ overfitted model ⟹ poor results. But there is no way to know how much is too much except to compare results.
+
+Epoch: 1 pass through the training data
+
+Checkpoint: Save the current model to disk.
+
+Usually there is a checkpoint every X epochs (the smaller the X the better, but also the more HDD space you use).
+
+Metrics: Actual vs Predicted
+
+Positive	Negative	
+Positive	True Positive (TP)	False Positive (FP) = Type I error	Precision TP/(TP+FP)
+Negative	False Negative (FN) = Type II error	True Negative (TN)	Miss rate FN/(FN+TN)
+Recall or TPR TP/(TP+FN)	Fall-Out or FPR FP/(FP+TN)	
+Improving one can harm the other.
+
+ROC: true positive rate vs false positive rate
+
+PR: Precision vs Recall
+
+ROC represents: As you vary the threshold, how many more false positives slip in, and how many more true positives are successfully found.
+
+Area under the curve is ROCA. This area represents threshold invariant accuracy.
+
+Big data isn’t enough. The less data we train on, the worse our model. The less data we test on, the less we trust our model.
+
+K−fold cross validation. Divide data into k subsets. Repeat holdout method k times. Each time, one subset is the test set, the rest are the training sets.
+
+Each set is used to validate once. Each set is used to train K−1 times.
+
+Question
+
+Why cross-validate?
+
+This kind of ML is “offline” - when the technique is validated, then it can be deployed on live data in real-time. Cross-validation gives you confidence that the technique will work on typical data sets.
+
+A/B testing for ML.
+
+Step 1: Offline training and evaluation.
+
+Step 2: A/B testing vs other methods. Return to step 1 if needed.
+
+We can use this to compare different feature selection methods ore compare to current best-practice models.
+
+A working model on the training set that has good precision and recall is half the problem. The rest is production.
+
+Lecture 14
+Sometimes the feature vector is still too high-dimensional to work with.
+
+To reduce the dimensionality of a set of n-grams: Hash them modulo some large prime (but much smaller than the original number of dimensions).
+
+On the assignment: mod1000009
+
+1M << 4B : collisions are rare enough to ignore.
+
+Near Neighbours Problem
+
+S - set of object
+D(a,b) - distance from object a to b
+t - maximum distance threshold
+Goal: Find all unordered pairs (a,b) such that D(a,b)≤t
+
+Template Based Protein Folding
+
+Given a sequence, find proteins in database with a similar sequence. This is not as easy as hamming distance, not all mutations are equal.
+
+Given high-dimensional datapoints x 
+1
+​
+ ,x 
+2
+​
+ ,…,x 
+n
+​
+  and some distance function d(x 
+1
+​
+ ,x 
+2
+​
+ ): Find all pairs of datapoints x 
+i
+​
+ ,x 
+j
+​
+  such that d(x 
+i
+​
+ ,x 
+j
+​
+ )<s.
+
+The naïve approach: just compute d(x 
+i
+​
+ ,x 
+j
+​
+ ) for all i,j. O(n) is possible to achieve.
+
+Question
+
+How can you find all identical items in a collection of n?
+
+Hash table - insert is O(1) - only need to compare collisions, not all pairs.
+
+This is O(n) assuming we have a low collision rate. With sufficiently large table, we can make the number of expected collisions sub-linear.
+
+Locality Sensitive Hashing (LSH)
+
+For X, X 
+′
+  such that d(X,X 
+′
+ )=c
+
+Normal Hash Function: If you know X and h(X) : No idea what h(X 
+′
+ ) is
+
+LSH Hash Function: If you know X and h(X) : E[d 
+hash
+​
+ (h(X),h(X 
+′
+ ))]=c
+
+Items that are close have hash codes that are close (on average).
+
+Scalar LSH to find Near Neighbours
+
+Make a hash table
+Use buckets that are w wide (and overlapped, so items go in multiple buckets)
+Most values x 
+i
+​
+ ,x 
+j
+​
+  such that d(x 
+i
+​
+ ,x 
+j
+​
+ )<c will have at least one bucket in common.
+Most values >c will not share a common bucket.
+So we need to create a LSH function.
+
+Question
+
+How do n-grams give us a distance measure?
+
+Jaccard distance. This is used for sets (which we have).
+
+A document embedding is the set of n-grams it contains.
+
+sim(C 
+1
+​
+ ,C 
+2
+​
+ )
+d(C 
+1
+​
+ ,C 
+2
+​
+ )
+​
+  
+= 
+∣C 
+1
+​
+ ∪C 
+2
+​
+ ∣
+∣C 
+1
+​
+ ∩C 
+2
+​
+ ∣
+​
+ 
+=1−sim(C 
+1
+​
+ ,C 
+2
+​
+ )
+​
+ 
+Question
+
+What n do we use?
+
+Depends on if we are doing byte-level or word-level n-grams.
+
+Jaccard for Multisets. Just adjust the definitions of union and intersection.
+
+Union: If C=A∪B then C[k]=max(A[k],B[k])
+
+Intersection: If C=A∩B then C[k]=min(A[k],B[k])
+
+∣A∣= the sum of the counts for all keys in A.
+
+n-gram embeddings are usually regular sets, not multisets.
+
+Remember a set can be represented as a bit vector.
+
+Assign natural numbers 0…n to the elements of the Universe set. Bit vector at index i is 1 if the set contains element I. Benefit: union/intersection are bitwise or / bitwise and.
+
+LSH - A hash function h(x) such that:
+
+If C 
+1
+​
+  and C 
+2
+​
+  are highly similar, then with high probability: h(C 
+1
+​
+ )=h(C 
+2
+​
+ )
+If C 
+1
+​
+  and C 
+2
+​
+  are highly dissimilar, then with high probability: h(C 
+1
+​
+ )
+
+=h(C 
+2
+​
+ )
+Different approach is needed for each definition of similarity.
+
+For Jaccard distance, we use min-hashing.
+
+Two views of min-hashing
+
+Let C be a set of integers (each n-gram has been numbered). Imagine you have a random permutation π. h(C;π)=min 
+i∈C
+​
+ π(i).
+
+Let C be a set of n-grams (n-tuples of strings). Imagine you have a random enumeration function π. h(C;π)=min 
+i∈C
+​
+ π(i).
+
+Question
+
+What is an enumeration function?
+
+It’s a bijection that maps some set S onto the range [1,∣S∣] (MATH239).
+
+Question
+
+So are we permutating or enumerating?
+
+Yes
+
+Permutating assumes the n-grams have already been enumerated and represented as a bit-vector.
+
+Enumerating assumes they are still a set of string tuples and we are assigning each n-gram an integer.
+
+It is easier to create a random permutation than it is to create a random n-gram enumerator. Being mathematically equivalent isn’t the same thing as being computationally equivalent.
+
+Collection as a matrix
+
+Row = elements of a set (n-gram)
+Column = one set (document)
+1 in (i,j)→ n-gram i is in document j
+Next objective: Compute a signature for each column such that |sig| ≪ |col|. Ideally, column similarity = signature similarity.
+
+Lecture 15
+Claim: Pr[h(C 
+1
+​
+ ;π)=h(C 
+2
+​
+ ;π)] = ∼(C 
+1
+​
+ ,C 
+2
+​
+ )
+
+Proof:
+
+Let y=h(C 
+1
+​
+ ∪C 
+2
+​
+ )
+
+It must be the case that y=h(C 
+1
+​
+ ;π) or y=h(C 
+2
+​
+ ;π)
+
+Is it in both though? There are ∣C 
+1
+​
+ ∩C 
+2
+​
+ ∣ things in both.
+
+And ∣C 
+1
+​
+ ∪C 
+2
+​
+ ∣ possible values for y.
+
+So the probability it’s in both = 
+∣C 
+1
+​
+ ∪C 
+2
+​
+ ∣
+∣C 
+1
+​
+ ∩C 
+2
+​
+ ∣
+​
+ =sim(C 
+1
+​
+ ,C 
+2
+​
+ )
+
+The permutation is random. So every single element y in the union has the same change of being placed first by the permutation.
+
+So h(C;π) is a LSH.
+
+Let A,B be docs such that S(A,B)=s
+
+h(A;π)=h(B;π) with an s% chance
+
+S(sig 
+1
+​
+ ,sig 
+2
+​
+ )={ 
+1
+0
+​
+  
+sig 
+1
+​
+ =sig 
+2
+​
+ 
+otherwise
+​
+ 
+​
+ 
+Signatures - generate K independent permutations.
+
+Sig(C)[i]=h(C;π 
+i
+​
+ )
+
+The signature is K×4 bytes (400 if K=100).
+
+Much smaller than column C.
+
+sim(sig 
+1
+​
+ ,sig 
+2
+​
+ ) = percentage of entries that are equal. Signature is not a set, we cannot use Jaccard similarity.
+
+Implementation
+
+
+sig[C][i] = \infty for all C, I
+for each row index j in each column C:
+	if C[j]:
+		for each hash function index i:
+			sig[C][i] = min(sig[C][i], h_i(j))
+Computing h 
+i
+​
+  is prohibitive.
+
+Question
+
+How many n-length permutations are there?
+
+n!
+
+Question
+
+How many bits needed to distinguish each possible permutation?
+
+Ω(lg(n!))=Ω(nlgn)
+​
+ 
+That is too many bits (pigeonhole principle).
+
+Alternative: Let h 
+i
+​
+  be a k-universal hash function.
+
+
+for each hash function index i:
+	sig[C][i] = min(sig[C][i], h_i(j))
+Conceptually: let π 
+i
+​
+  be the permutation we get if we sort using h 
+i
+​
+  as the key function - break ties arbitrarily.
+
+K−Universal hash function
+
+Pick K constants - c 
+1
+​
+ …c 
+k
+​
+ 
+
+h(x)=(c 
+1
+​
+ +c 
+2
+​
+ x+c 
+3
+​
+ x 
+2
+ +…c 
+k
+​
+ k 
+k−1
+ ) (modp)
+
+K− Universal means h(x 
+1
+​
+ ),h(x 
+2
+​
+ ),…,h(x 
+k
+​
+ ) will not correlate.
+
+This might be good enough.
+
+P(h 
+k
+​
+ (y)=min(h 
+k
+​
+ (X)))=(1/∣X∣)(1±e 
+−k
+ )
+
+LSH requires a hash table, not just the codes.
+
+A MinHash signature is an n-vector, not a scalar hash code. How do we assign based on this?
+
+An n-dimensional table (or, equivalently, a 1-dimensional table where you use a secondary hash function on the sig vector)
+n independent 1-dimensional tables
+A secret third thing?
+Third thing: Slice the signature vector into b equal sized bands of r values each. Have b 1-dimensional tables, and consider (A,B) a candidate pair of they collide in any of the tables.
+
+Our hash table will have a lot of buckets. We ignore collisions.
+
+Summary
+
+Step 1 – convert each document into n-grams
+Step 1.1 – convert each unique n-gram into an integer
+Step 2 – Generate a set of universal hash functions
+Step 3 – For each document, compute the short signature vector
+Step 4 – Pick values of R, B to tune to the false-positive and/or false negative rates you want
+Step 5 – Hash each of the B bands for each document to find candidate pairs
+Step 6 (technically optional, but absurd to skip) – Confirm the signatures are similar
+Step 7 (more optional) – Confirm the documents are similar
+This is still quadratic.
+
+We can do it with spark import org.apache.spark.ml.feature.MinHashLSH.
+
+Question
+
+What if I have n-dimensional coordinates and am using Euclidean distance?
+
+Bucketed Random Projection
+
+Create a random unit n-vector v “axis of projection”
+For each point p, dot with v to get a single value
+Pick radius r. Create buckets with width r
+Only need to do pairwise comparisons for documents in each bucket
+Problem: p and q are far apart, but project to the same value. Is this rare? No. Curse of dimensionality. For two random vectors v 
+1
+​
+ ,v 
+2
+​
+ ,E[v 
+1
+​
+ ⋅v 
+2
+​
+ ]→0 as d→∞.
+
+Solution is to use more than 1 projection, non-uniform distribution, and we ignore bucket 0.
+
+One way to reduce dimensions to Euclidian / vector embeddings is a random projection matrix from D 
+high
+​
+  to D 
+low
+​
+ 
+
+Computing a true projection matrix is expensive. But the true projection matrix is expensive.
+
+Lecture 16
+Clustering: Given a cloud of data points, we want to understand its structure
+
+Given a set of points, with a notion of distance between points, group the points into some number of clusters, so that
+
+Members of a cluster are close/similar to each other
+Members of different clusters are dissimilar
+Usually:
+
+Points are in a high-dimensional space
+Similarity is defined using a distance measure
+Clustering is a hard problem (curse of dimensionality)
+
+Clustering in two dimensions looks easy
+Clustering small amounts of data looks easy
+And in most cases, looks are not deceiving
+Many applications involve not 2, but 10 or 10,000 dimensions.
+
+High-dimensional spaces look different: Almost all pairs of points are at about the same distance.
+
+Clustering problem:
+
+Represent a document by a vector (x 
+1
+​
+ ,x 
+2
+​
+ ,…x 
+k
+​
+ ), where x 
+i
+​
+ =1⟺ the ith word (in some order) appears in the document. Documents with similar sets of words may be about the same topic.
+
+We can think of distance via cosine distance (vectors), Jaccard distance (sets), Euclidean distance (points).
+
+Hierarchical Clustering:
+
+Agglomerative (bottom up) - Each point is a cluster, combine the two nearest clusters into one
+
+Top down - Start with one cluster and recursively split it
+
+Question
+
+How do we represent a cluster of more than one point?
+
+For the Euclidean case, each cluster has a centroid (average of its data points).
+
+Question
+
+How do we determine the nearness of clusters?
+
+Measure cluster distances by distances of centroids.
+
+For the Non-Euclidean case, a clustroid is the datapoint closest to other points.
+
+We treat the clustroid as if it were the centroid, when computing inter-cluster distances.
+
+The naïve approach of hierarchical clustering is O(N 
+3
+ ). With a careful implementation we can reduce time to O(N 
+2
+ logN). This is still too expensive for big datasets.
+
+k-means clustering.
+
+We assume Euclidean space, start by picking k, the number of clusters, and initialize clusters by picking one point per cluster.
+
+For each point, place it in the cluster whose current centroid it is nearest.
+
+After all points are assigned, update the locations of centroids of the k clusters.
+
+Reassign all points to their closest centroid. Sometimes moves points between clusters.
+
+We repeat the last two steps until we converge. Convergence happens when points don’t move between clusters and centroids stabilize.
+
+Question
+
+How do we select k?
+
+We select different k, looking at the change in the average distance to the centroid as k increases. Average falls rapidly until right k, then changes little.
+
+Spark implementation:
+
+Pick a random centroid
+Create pair RDD by assigning (key is cluster #) - partition by key and cache
+reduceByKey + map to get new centroids
+Create new pair RDD by reassigning using new centroids. Accumulator tracks how many data points changed cluster ID. Don’t forget to unpersist the old assignment RDD
+If accumulator > 0, go to step 3.
+Lecture 17
+Database workloads
+
+OLTP (Online Transaction Processing)
+
+Most applications fall under this. They are user facing so they must be fast, low latency, and concurrent. The tasks are a small set of common queries, and access is random reads and small writes.
+
+OLAP (Online Analytical Processing)
+
+BI and data mining. Back-end batch workloads, low concurrency. The tasks are complex analytics, and access is full table scans and big data.
+
+This is two patterns on the same database. The solution is a data warehouse.
+
+Frontend → Backend → Database tuned for OLTP → ETL → Data warehouse tuned for OLAP → BI tools and analysts.
+
+The data warehouse is also a database. Extract - pull data from database, transform - put it into a different schema that’s more suited for OLAP, load - put it into the data warehouse.
+
+Question
+
+When do we perform ETL?
+
+We might be able to do a rolling ETL where updates from the OLTP database are immediately sent to the warehouse. You might also just have a batch transfer that happens on a daily basis, since the BI queries are slow, stale data is okay.
+
+The typical OLTP schema captures relations between items. Typical CS348 database design.
+
+Typical OLAP schema is a star schema. The centre is a fact table, and the points are dimension tables. This is a snowflake schema.
+
+OLAP (Hyper) Cubes
+
+A cube with axes products, geography, and time. Common operations are slice and dice, roll up/drill down, pivot of this n-dimensional hypercube.
+
+Question
+
+Why star?
+
+BI and data mining queries are ad hoc.
+
+The schema cannot be designed around ad hoc queries.
+
+A star supports common OLAP queries efficiently.
+
+The data warehouse can pull from multiple backend databases. That’s why it is a warehouse.
+
+Data generation often exceeds data ingestion rate. Disks are cheap now, we can save everything and worry about importance later. Something that doesn’t appear valuable might be.
+
+Instead of a warehouse we can use Hadoop. We can now have Extract, Load (onto HDFS), Transform (with a MapReduce job to clean data up). Instead of BI tools they are big data tools, and instead of analysts they are data scientists.
+
+Question
+
+Why not just use databases?
+
+SQL is powerful but databases do not scale well.
+
+Databases are good if the data has structure (and we know this structure), the data is clean, and we know what queries we will run ahead of time.
+
+Databases are not great if the data has little structure, if the data has a lot of noise, and if we are going data mining.
+
+Lecture 18
+Advantages of Hadoop over RDBMS.
+
+There are no schemas, flexible, designed for rapid ingestion. Most OLAP is full-table scans. Hadoop is not a data warehouse, it is a date lake. Data lakes are relational and non-relational data from many sources. No schema, low-cost storage, mix of curated and raw data.
+
+ELTs come into a data lake, which can then go to data warehouses for traditional BI tools, but can also use Spark and Hadoop right from the data lake. This is a data lakehouse approach.
+
+Spark has SparkSQL, so you can write SQL with Spark instead of using Hive.
+
+Managing a data warehouse is hard work, we can just pay someone else to do it (cloud). Infrastructure as a service. Can use Oracle Cloud Base, Amazon RDS (databases), Oracle ADW (data warehouse), AWS S3 (data lake).
+
+We have Spark SQL, on top of SQL query interface, on top of execution layer, on top of HDFS (and other data sources).
+
+Behind the scenes, we have a query parsed to an AST, plan creates an intermediate representation, generate java code, execute code and submit it to the cluster.
+
+Relational algebra reminder (all of this was covered in CS348)
+
+Selection is σ, similar to SELECT ... WHERE. SELECT is an easy map-side filter, no reducer task. Projection is π, similar to SELECT (col1, col2, ...) FROM . Projecting in MapReduce is a map-side tuple transformation, no reducer task.
+
+Union (∪) is also part of SQL. (SELECT ...) UNION (SELECT ...). Hadoop MapReduce has MultipleInputFile class. 1 mapper class per input file.
+
+Difference (−) is also part of SQL. (SELECT ...) MINUS (SELECT ...). Subtract cannot be done in map side alone. Implementation is a modification of the merge from merge sort.
+
+Cartesian product (×) is also part of a SELECT statement. This is a cross join. Cartesian product is just huge, it shouldn’t really be done.
+
+The Reduce in MapReduce is often called the Aggregation Phase. Every SQL aggregation function is done on the reduce side.
+
+Relational Joins
+
+Inner Join (⋈)
+
+One-to-one joins: No crossing is needed, memory requirements are minimal. Modified merge sort.
+
+One-to-many joins: For the one side, hold the tuple in memory, cross with all tuples from the many side with matching join key. One pass, minimal memory usage.
+
+Many-to-many joins: Need to hold all tuples with a given key in memory for both sets. Cross one set agains the other. Bad when both sets are large, and the many is large.
+
+For Inner Join on MapReduce there are 3 options. They are ordered by goodness.
+
+Hash Join
+Map-Side Join
+Reduce-Side Join
+Hash Join: If one set is so small i t easily fits into memory of a single node then, load it into every mapper as a hash table, each mapper joins its split against the hash table, map-side only, can be pipelined. This is fast
+
+Map-Side Join: If both files are sorted by key and split by the same partitioner, in that case mappers can join row by row.
+
+Reduce-Side Join: Mappers - MultipleInputFiles class. Basic idea is that each mapper emits its stuff, key = join key. Reducer gets keys in sorted order, easy to join them together.
+
+Reduce-Side 1-to-1 join: Reducer always gets 1 key per subquery. Join is straightforward. Need to tag each tuple with its source, but the sort order doesn’t matter.
+
+Reduce-Side 1-to-many join: Reducer holds the tuple from the 1-side in memory, then joins with all of the many-side tuples with the same key.
+
+Question
+
+How does the one side arrive first?
+
+Remember the secondary sorting pattern. (Join key, origin) → Map Reduce Key. Make sure the partitioner only cares about the join key, and the sort order puts the one side first.
+
+For outer joins, the logic is the same except we now have to handle the empty case instead of skipping the unpaired tuple.
+
+We first build the logical plan, optimize the logical plan, and select the physical plan.
+
+How do we know the format of the tables? How does it know the column names? Metadata.
+
+SparkSQL: Spark DataFrames are like tuple RDDs but with named columns DataFrame API operators are named like the SQL operators.
+
+Lecture 19
+Two options
+
+
+SELECT dept.name, count(dept.name)
+FROM employees 
+JOIN dept ON (employees.did = dept.id) 
+WHERE employees.title = "intern"
+GROUP BY dept.id
+
+employees.join(dept, epmloyees("did") === dept("id")).
+	where(employees("title") === "intern").
+	groupBy(dept("id"), dept("name")).agg(count(dept("name")))
+Spark DataFrames are like tuple RDDs except they have different operators and each element of the tuple is called a column.
+
+Creating a DataFrame
+
+
+val myRDD = 
+	sc.textFile("marks.csv").map(_.split).
+	map(attrs => (attr[0].toInt, attr[1],
+				attr[2].toFloat))
+ 
+val myDF = myRDD.toDF("studentid", "component", "mark")
+Rows vs Column Stores
+
+Row stores: Easier to modify a record via in-place updates. Might read unnecessary data when processing.
+
+Column Stores: Only read necessary data when processing. Tuple writes require multiple operations. Tuple updates are complex.
+
+Advantages of Column Stores: better compression and read efficiency. Works well with vectorized execution and compiled queries. We can do RLE for column stores.
+
+Hadoop can do binary column stores. Apache Parquet.
+
+Parquet is a columnar storage format available to any project in the Hadoop ecosystem, regardless of choice of data processing framework, data model, or programming language.
+
+Parquet returns Group values. You cannot select the elements of a Group, they are private. It needs to be converted to string and then split.
+
+An SQL query in Spark will be compiled and optimized, though only at runtime.
+
+Lecture 20
+Batch processing vs Stream processing
+
+Batch processing:
+
+All the data
+Not real time
+Long wait
+Stream processing:
+
+Process data as it arrives
+Real time (ish)
+Low latency
+Business intelligence should still be real-time. Think credit cards, transportation, manufacturing, retail etc.
+
+Data stream pipeline
+
+
+Data Sources
+Data Ingest
+Stream processing engine
+HDFS
+HBase
+Kafka
+App 1
+App 2
+App n
+Kafka is a distributed pub-sub broker designed for resilience and availability. Flume is a distributed log aggregator designed for resilience and availability. HBase is a distributed key-value datastore, modelled after Google’s BigTable and built on top of HDFS.
+
+A data stream flows into a data lake.
+
+A data stream is a sequence of items (tuples). They are structured, ordered, continuously arriving, and high volume. We process it via filters, maps, flat maps, groups, aggregations, joins.
+
+The problem is that reduce-like tasks rely on having all of the data. How can we define them continuously?
+
+For aggregation and grouping, when do we start and when do we stop.
+
+For joining stream to static data, this is an easy lookup, not a problem.
+
+For joining a stream to a stream, how long do we wait for the corresponding key. When do we stop joining?
+
+The solution is to define all “reduce-like” transformations for a given window.
+
+We can do this based on an ordering attribute, based on counts, based on explicit markers.
+
+Sliding vs tumbling windows.
+
+Sliding window example can be the last minute of data, updated every 5 seconds. Each window has most data in common with previous.
+
+Tumbling window could be last minute of data, updated every minute. We have a blank slate, no data in common between windows. We might be able to make a sliding window out of smaller tumbling windows.
+
+Windows based on counts have a window of n records over the stream. When the stream is slow, windows are long. When the stream is fast, windows are very short.
+
+Challenges of stream approach:
+
+Inherent challenges are latency requirements and memory/storage. Framework challenges are bursty nature of streams, load balancing and clustering, out-of-order delivery.
+
+Two hard problems with distributed delivery are exactly-once deliver and out-of-order delivery.
+
+We have producers/consumer models. Producer generates/gathers/aggregates data, consumer process it.
+
+Producer can send to a consumer (push/callback method), or the consumer can request data from the producer (pull/poll method).
+
+A consumer can consume data from multiple producers, and a producer might need to send data to multiple consumers. How do we scale this?
+
+We need middleware. A data broker sits between producers and consumers and acts as a pub/sub queue. Producers push to the broker, broker pushes to consumers. We could also have a push pull method where the producer pushes to the broker, the consumer pulls from the broker as needed. An advantage of consumer polling is that the broker doesn’t need to worry about spotty connections by consumers. Disadvantage is that frequent polling for infrequently arriving data is wasteful.
+
+Stream Processing Frameworks : Apache Spark Streaming, Apache Storm, Apache Flink.
+
+Spark Streaming: Discrete Streams (DStream)
+
+Tumbling window with a very small duration (usually one second). We can make sliding windows out of a bunch of tumbling windows.
+
+Every t seconds, collect all data into an RDD. Process RDD through Spark Engine like any other RDD.
+
+DStream is a sequence of RDDs representing a stream of data. Transformations modify data from one DStream to another. There are standard RDD operations and also stateful operations. Output operations send data to an external entity.
+
+Example
+
+Tweet Streams
+
+
+tweets = scc.receiverStream(TweetReceiver(username, password))
+hashtags = tweets.flatMap(getTags)
+counts = hashTags.window(Minutes(10), Seconds(1)).countByValue()
+The first count RDD depends on the first 600 hashtag RDDs. The second count depends on hashtag RDDs 2 through 601.
+
+
+tweets = scc.receiverStream(TweetReceiver(username, password))
+hashtags = tweets.flatMap(getTags)
+tagCounts = hashTags.countByValueAndWindow(Minutes(10),...)
+This is much more efficient.
+
+Smart window-based reduce.
+
+Incremental counting generalizes to many reduce operations. We need a function to inverse reduce (i.e. subtract for counting).
+
+Kafka is a general purpose data broker. Created by LinkedIn, named after the author Franz Kafka.
+
+Kafka has up to 2 million writes per second on 3 cheap machines. Kafka is fast. Even though all data is persisted to disk, all writes go to the page cache of OS. Very fast reads since it’s efficient to transfer data from page cache to a network socket.
+
+Kafka stores data by a topic. Kafka topics are split into partitions, and are replicated across the cluster. Brokers are leaders for partitions, and other brokers are follower for that same topic. Kafka can tolerate R−1 failures without data loss where R is the amount of replication.
+
+Messages from the producer are hashed, or balanced round-robin and appended to the partitions. Operations are idempotent. Producers send a unique key with each batch of message. Brokers log these and reject duplicate messages.
+
+Partitions are totally ordered, but topics are not. If events have a key then all events with the same key are in the same partition, and therefore are in order by arrival time. If events have no key, they are not in exact order anymore.
+
+A partition can be read by multiple consumers. Each consumer remembers its offset in each partition. Consumers are responsible for their own bookkeeping.
+
+Lecture 21
+Consumers can be grouped. A consumer group gets all messages for a given topic, but each consumer only gets one partition’s worth. Consumers are given a batch of messages, including the index range. Consumer should remember the range so it knows how to ask for the next ones and so that it can discard duplicates.
+
+Apache Flume is a distributed service for collecting, aggregating, and moving large amounts of log data. Usually aggregates and writes to HDFS, but you can have other pipeline setups.
+
+Question
+
+What if there is a big burst?
+
+If we can’t examine all of it, what can we do so that the lost data causes us the least harm. We have some algorithmic solutions.
+
+The solution is to randomly sample the data (in a fair way).
+
+Reservoir Sampling
+
+Problem: Select S values uniformly at random from a stream of N values.
+
+Assumption: N is very big, and not known ahead of time.
+
+The solution is to store the first S values. When receiving kth, keep it with probability S/k. If keeping it, randomly discard one of the existing S elements to make room.
+
+We can prove this by hand-wavy induction.
+
+Claim: For K>=S, all values V 
+1
+​
+ ,…,V 
+k
+​
+  have a probability S/K of being in the reservoir.
+
+Basis for induction K=S+1.
+
+Assume that for some K>S, all K values have a S/K chance of being in the reservoir.
+
+Question
+
+What are the chances the K+1 value is kept?
+
+S/(K+1)
+
+Question
+
+What are the chances an existing item is kept?
+
+1−(S/(K+1)×(1/S))=K/(K+1)
+
+Question
+
+What are the chances an item survives to K+1?
+
+S/K×K/(K+1)=S/(K+1)
+
+So for all K>S, after K values have been seen, each value has a uniform S/K chance of being retained in the reservoir.
+
+Common multiset operations that hashing can be used to estimate
+
+Cardinality: How many unique elements are in the multiset?
+Membership: Is X a member of the multiset?
+Frequency: How often does X appear in the multiset?
+HyerLogLog Counter (HLL)
+
+The task is to estimate the cardinality of a multiset (number of unique items).
+
+Observation: hash(item) → vector of 32 bits.
+
+2
+1
+​
+  of items will have hash code starting at 0.  
+4
+1
+​
+  of items will have hash code starting with 00.
+
+If we’ve seen 64 elements, we would expect that one of them would start with 000000. All we need to do is record the longest string of leading 0s we’ve seen in any hash codes.
+
+If we’ve seen x, our estimate is we’ve seen approximately 2 
+x
+  unique items.
+
+Bloom Filters
+
+Problem: Set is too large to hold, want to know if it contains X.
+
+Solution: A bit vector of m bits, and k unique hash functions.
+
+Put: We take our input, put it through the hash functions where our output is between [0,m]. Set the resulting bits in the vector to 1.
+
+Contains: Take the input, run it through the hash function, and check if all of the resulting bits are set to 1.
+
+It is obvious that this has no false negatives. If it’s been seen, all of it’s bits are set to 1. However there are false positive. The more unique elements seen, the more bits are set to 1.
+
+Can tune false positive rate by adjusting values for m and k.
+
+Count-Min Sketch
+
+Counting the frequency of a value X within a multiset. Like Bloom Filters, we have a vector-length m and k independent hashes. Unlike Bloom Filters, each hash has its own int-vector of m values. We increment the bits specified by the output from the hash functions by 1 in the matrix of vectors.
+
+When we do get, we run the input through the hash function, check all the bits and take the minimum count to be our frequency. We take the minimum since other integers may “collide” on some bits and artificially increase the count.
+
+Lecture 22
+Until now we’ve only done sequential reads and append-only writes. What if we want random reads and random writes.
+
+Question
+
+Why not RDBMS?
+
+It does not scale out and it does not support semi-structured data.
+
+NoSQL
+
+Not only SQL, doesn’t mean there is no SQL.
+
+Common features
+
+Horizontal Scaling
+Replicated and Distributed Data
+Weaker Concurrency
+Flexible Schemas
+SQL (ACID) vs NoSQL (BASE - Basically Available, Soft State, Eventually Consistent)
+
+SQL
+
+Relational (OLTP) database
+Analytical (OLAP) database
+NoSQL
+
+Key-Value stores
+Memcached, Redis
+Column stores
+BigTable, Cassandra
+Document-based
+CouchDB, MongoDB
+Graph-based
+Neo4J, InfoGrid
+Questions to ask: Partitioning (sharding), Replication, In-Memory Caching
+
+What they all have in common, keys are strings, and these are all distributed databases.
+
+Question
+
+Keys in the cluster: In your cluster of 400 servers, which has the key X?
+
+Consistent Hashing (Peer to Peer)
+
+Each Peer is assigned m-bit GUID by consistent hashing. For each key k, it’s assigned to the first node in the ring with a GUID at least h(k) - same hash function as used to determine GUID. This is called successor(k).
+
+What is the benefit?
+
+For K keys and N nodes
+
+With high probability, each node has at most (1+ϵ)K/N keys assigned to it.
+
+Therefore, when nodes connect/disconnect, only O(K/N) keys need remapping.
+
+Chord distributed protocol
+
+First Attempt:
+
+Each node has a pointer to its predecessor and successor.
+
+When we send a request to any node, it gets routed to the correct one in O(n) hops. We can do better. Each machine can hold a pointer to its predecessor, successor and finger table (+2, +4, +8, …). When sending a request to any node, gets routed to correct one in O(logn) hops.
+
+We jump as far as we can without going over k (to find successor(k)). We repeat until using the one step link. Since working by powers of 2, will follow each level at most once. Since there are m=log 
+2
+​
+ n levels, O(logn) jumps are needed.
+
+A simpler solution is a service registry. We can just ask the registry who is responsible for what key in O(1).
+
+Question
+
+When a new machine joins, what happens? How do we rebuild the predecessor, successor, finger tables?
+
+We need to maintain two invariants. Each node correctly knows its successor in the ring, for every key k node successor(k) is responsible for k.
+
+When a new node needs a finger table
+
+Naïve - run a query per entry - O(mlogn)
+Better - query based on previous entry - O(log 
+2
+ n)
+Best - take successor’s table and update only entries that might be wrong - O(logn)
+Nodes that were not contacted by the new one might have outdated finger tables. The solution is a stabilization process in the background updates finger tables periodically.
+
+Theorem: With high probability, adds (and removes) require O(log 
+2
+ n) messages to re-establish the invariant.
+
+Question
+
+How do we solve for replication in this pattern?
+
+Machine ahead stores copy of predecessor.
+
+Most NoSQL systems are not peer-to-peer. Joins and Leaves are not common. So none of the following use Chords for their DHT.
+
+Memcached is a simple distributed key-value store where values are arbitrary bytes. It id distributed - client hashes keys to pick server. It is disconnected - servers do not know anything about each other. It is not persistent. The purpose is to cache things.
+
+Redis is a data-structure server. Values can include lists, hashes, sets, streams, HLL Counters. It is distributed - client hashes key to determine server. There is redundancy/replication. Coordinated - servers talk to each other with efficient resharding. Persistent - stores everything in RAM, but persists to HDD.
+
+Document Stores
+
+MongoDB: Keys are strings. Values are JSON-like documents with optional schema. Allows indexing and queries.
+
+CouchDB: Keys are strings. Values are JSON documents. Uses MVCC for eventual consistency.
+
+Graph-Based Databases
+
+Neo4J: Stores graphs. Everything is a node, edge, or attribute. ACID compliant transactions.
+
+Column Stores
+
+Google BigTable: Maps 2 strings (row key, column key) and timestamp to an arbitrary byte stream. Has bloom filters at the row and row+col level.
+
+HBase: HBase is to BigTable as Hadoop is to Google’s MapReduce. Hadoop Jobs can read from / write to HBase tables.
+
+A table in BigTable is a sparse, distributed, persistent multidimensional sorted map. Map is indexed by row key, column key, and a timestamp.
+
+Consistency
+
+Consistency is extremely important. Alice transfers money to Carol, Bob transfers money to Carol. Total amount of money must stay the same.
+
+Consistency: All nodes return the same value
+
+Availability: Node failures do not prevent operation
+
+Partition Tolerance: System operates despite network partition. When a link goes down, the network still operates in two partitions, and customers in multiple regions are both unaffected.
+
+Theorem
+
+CAP Theorem: Pick 2, you cannot have all 3.
+
+So, there are three kinds of distributed systems:
+
+CP: Big Table and HBase
+AP: DNS
+CA: Impossible in distributed systems
+CAP Theorem is misleading. It is actually “When faced with a network partition, do you stay available, or stay consistent”.
+
+SQL → correctness above all (MySQL, PostgreSQL)
+
+NoSQL → availability above all (Redis, Amazon DynamoDB)
+
+Strong Consistency: After the update completes, and subsequent access will return the same updated value.
+
+Lecture 23
+2 Phase Commit ensures a transaction either fully commits or fully aborts.
+
+Assumptions: Persistent storage and write-ahead log at every node. WAL is never permanently lost.
+
+Limitations: It’s blocking and slow, what if the coordinator dies?
+
+A more general problem: address replication and partitioning.
+
+Assumption: Faulty nodes fail arbitrarily, so you should assume worst case behaviour. However faulty nodes do not collude.
+
+Paxos Algorithm
+
+3 types of nodes
+
+Proposers advocate for client requests to change a value
+Acceptors decide whether to accept a chance
+Learners remember values
+Acceptors are grouped into Quorums. Every Quorum must contain a majority of all acceptors, and no two Quorums can be disjoint.
+
+We also have weak consistency (after an update operation, some access will return the new value, and others the old value). Eventual consistency (special form of weak consistency, after an update at time t 
+0
+​
+  all access after some time t 
+1
+​
+ >t 
+0
+​
+  will return the same value).
+
+Eventual consistency in real systems.
+
+In an ATM we would want strong consistency. But, an ATM that doesn’t work makes customers unhappy (availability > consistency). ATM will work even if partitioned, but will limit your transaction size to $200.
+
+Facebook is eventually consistent. Facebook is a huge distributed network of data centres and is why it would be unworkable to have strong consistency and low latency. If it took 1-2 minutes for a post to stop spinning, people would give up.
+
+Question
+
+What if there are no partitions?
+
+Then it is a tradeoff between consistency and latency. Caused by the possibility of failure in distributed systems. High availability → replicate data → consistency problem.
+
+Availability and latency are arguable the same thing. Being unavailable is extremely high latency.
+
+PACELC is a more complete description of the space of potential tradeoffs of a distributed system.
+
+If there is a partition (P), how does the system trade off availability and consistency (A and C); else (E), when the system is running normally in the absence of partitions, how does the system trade off latency (L) and consistency (C).
+
+PA/EL Systems: Give up both C’s for availability and lower latency. (Dynamo, Cassandra)
+
+PC/EC Systems: Refuse to give up consistency and pay the cost of availability and latency. (BigTable, HBase)
+
+PA/EC Systems: Give up consistency when a partition happens and keep consistency in normal operations. (MongoDB)
+
+PC/EL Systems: Keep consistency if a partition occurs but gives up consistency for latency in normal operations. Strange. (Azure Cosmos).
+
+>_

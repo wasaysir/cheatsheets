@@ -39,7 +39,7 @@ AggregateByKey(zero, insert, merge): general version of reduceBykey
   - Perform shuffle, each reducer-like-worker will receive k-v pairs. Third parameter, merge, is used to combine accumulators
   - This can produce any output type, not just same, as ReduceByKey requests
 
-Since Spark mostly works via memory, caching can significantly improve performance. 
+Since Spark mostly works via memory, caching can significantly improve performance. Iterative algorithms with lots of constant information are much more performant in Spark because of caching.
 
 == Spark programming
 `sc.textFile("directory/*.txt")` creates an RDD of lines in file held in arbitrary order, w/o mentioning file origin
@@ -60,7 +60,7 @@ Distributed reduce transformations operate on RDDs of key-value pairs.
 - `visits.join(pageNames)`: Same as SQL iner join, where if key in visits matches key in pageNames, you match the value from one to the value to the other
 - `visits.cogroup(pageNames)`: Combines all values for a single key into one combined set.
 
-All pair RDD operations take an optional second parameter for the minimum number of tasks. You should match the number of partitions to the number of cores in the computer. 
+All pair RDD operations take an optional second parameter for the *minimum* number of tasks/partitions. You should match the number of partitions to the number of cores in the computer. 
 
 === DAG Scheduler
 #image("../assets/DAG-scheduler.png")
@@ -76,9 +76,9 @@ Spark is faster when you can keep the shuffle data in memory, whereas Hadoop alw
 #image("../assets/hadoop-v2-job-tracker.png")
 #image("../assets/spark-job-tracker.png")
 
-Whereas Hadoop only sees the executor, Spark sees the tasks sa the workers, so spark would recognize 4 tasks in the above, whereas Hadoop would see 2 executors. Therefore, the Spark driver must send relevant code to run each task. 
+Whereas Hadoop only sees the executor, Spark sees the tasks sa the workers, so spark would recognize 4 tasks in the above, whereas Hadoop would see 2 executors. Therefore, the Spark driver must send relevant code to run each task. The executor is to tasks what processes are to threads.
 
-Eg: `myRdd.map(lambda x: x >= thresh)` is compiled as byteocde and passed to each task. This is fine for compiled integers, but for hash tables this can be expensive.
+Eg: `myRdd.map(lambda x: x >= thresh)` is compiled as byteocde and passed to each task. This is fine for compiled integers, but for hash tables this can be expensive. *Serialization* is necessary across all the tasks.
 
 *Broadcast*: 
 - This method only sends one copy per Executor (worker machine) rather than task. 
@@ -106,3 +106,35 @@ Eg: `myRdd.map(lambda x: x >= thresh)` is compiled as byteocde and passed to eac
 - Less flexible 
 - Reduces before shuffle (combiner)
 - Reduces after shuffle (reducer)
+
+*combineByKey*:
+- More fine-grained control
+- $"RDD"\[\(K, V\)\]."combineByKey"\("create, append, merge"\) arrow.double "RDD"\[\(K,C\)\]$
+- create: make C from V
+- append: take C and add V to it
+- merge: combine two C
+
+*aggregateByKey*:
+- In between reduceByKey and combineByKey
+- $"RDD"\[\(K, V\)\]."aggregateByKey"\("zero, append, merge"\) arrow.double "RDD"\[\(K,C\)\]$
+
+#image("../assets/spark-group-by-key.png")
+
+== Core Concepts
+- Lineage Information: RDDs track their lineage (the graph of operations used to build them). This is what makes them "Resilient"; if a partition is lost, Spark uses the lineage to efficiently recompute just the missing data.
+- Performance: Spark is up to 10x faster on disk, 100x faster in memory, and requires 2-5x less code compared to Hadoop MapReduce.
+- SparkContext (sc): The main entry point for Spark functionality. It connects to the cluster and allows creation of RDDs (e.g., sc.textFile, sc.parallelize).
+- Lazy Evaluation: Transformations (like map, filter) are lazy and don't execute immediately. Actions (like collect, take, reduce) trigger the actual execution of the DAG.
+- Historical Context: Hadoop v1 only supported MapReduce. Hadoop v2 introduced YARN (Yet-Another-Resource-Negotiator), which manages resources for any distributed application, allowing Spark to run on Hadoop clusters.
+
+== Specific RDD Operations
+- take(k): Returns the first $k$ elements of the RDD.
+- collect(): Returns all elements of the RDD to the driver program. Warning: Can cause OutOfMemory (OOM) errors if the dataset is too large.
+- Scala Specifics: Uses val for immutable values and var for mutable variables. Scala handles key-value pairs cleanly using pattern matching and case lambdas.
+
+== Partitioning & Shuffling
+- Range Partitioner: Often used for sorting. Workers gather statistics on key distributions, and heuristics attempt to divide the keys into ranges of approximately equal sizes.
+- Custom Partitioner: You can define custom routing by extending the Partitioner class, requiring you to override numPartitions and getPartition(key).
+- Repartition vs. Coalesce:
+  - repartition(n): Increases or decreases the number of partitions. It always triggers a full network shuffle.
+  - coalesce(n): Only decreases the number of partitions. It avoids a full shuffle by safely merging existing partitions (narrow dependency), making it much faster than repartitioning when downscaling.

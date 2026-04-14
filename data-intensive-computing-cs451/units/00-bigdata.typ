@@ -1,4 +1,4 @@
-= 
+= Big Data
 / Big Data: Sufficiently large number of data (interpretation open)
 
 / Vertical Scaling: Improving the capacity of a single computer
@@ -25,3 +25,10 @@ Problem: You need to find some way to partition the data cleanly. Dividing by by
 - Clusters of racks build a data server
 - Data servers can communicate to each other. 
 Tangent: Moving from one server to a server in a different data server requires moving from 5 network switches (Primary rack switch, primary cluster switch, Switch between data servers, secondary cluster switch, secondary rack switch)
+
+== Challenges of Parallelization
+Distributed computing is fundamentally difficult because it introduces concurrency issues across multiple physical machines:
+- *Race Conditions*: Non-deterministic behavior when timing affects the output.
+- *Deadlocks*: Multiple processes blocked indefinitely waiting for each other.
+- *Livelocks*: Processes that constantly change state but never make progress.
+- *Abstraction*: We use frameworks like MapReduce to abstract these "assembly-level" networking problems away, allowing us to focus on data science and analytics infrastructure.

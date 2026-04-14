@@ -1,4 +1,4 @@
-= Distrbuted File System
+= Distributed File System
 / Sharding: Distribute partitions of a large file to different servers
 / Fault Tolerance: Store each chunk redundantly on multiple servers
 / Replication Factor: Number of redundant copies of each partition in a DFS
@@ -63,4 +63,24 @@ Typical Supercomputer:
 Problem is we're data-bound, not CPU, so single point of access for data will be a bottleneck.
 Hadoop Cluster Architecture:
 #image("../assets/colocated-nodes.png")
-- By colocating data and processing, Hadoop can optimize significantly to minimize copy over network. 
+- By colocating data and processing, Hadoop can optimize significantly to minimize copy over network. This means shuffling splits to nearest worker, if it has block. Most maps read local data.
+
+=== Block Placement Rationale
+The placement policy balances reliability against write bandwidth:
+- Fault Tolerance: By ensuring replicas exist on at least two racks, the system survives a total rack failure (e.g., a switch failure or a "rack fire").
+- Traffic Optimization: Inter-rack communication has significantly lower bandwidth and higher latency than intra-rack. 
+- Strategy: By placing the 2nd and 3rd replicas on the same remote rack, the data only has to cross the inter-rack switch once to populate two different nodes, saving expensive network bandwidth.
+
+=== Resource Manager
+The Resource Manager (RM) coordinates the execution of jobs:
+- Scheduling: It assigns map and reduce tasks to specific worker nodes.
+- Data Locality: The RM communicates with the Namenode to determine which DataNodes host the required blocks.
+- Co-location: It attempts to move the "worker to the data" by scheduling tasks on the same physical nodes that store the HDFS blocks, minimizing network copy costs.
+
+=== Replication Engine
+The Namenode runs a continuous replication engine to maintain cluster health:
+- Heartbeats: DataNodes send signals every 3 seconds; if missed, the node is marked as failed.
+- Integrity: Uses checksums to identify corrupt blocks.
+- Rebalancing: 
+  - Disk Usage: Ensures data is distributed so that all HDDs have approximately equal usage.
+  - Traffic Balancing: Prevents assigning new replicas to nodes or racks that are currently experiencing high network congestion.
