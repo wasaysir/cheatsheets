@@ -1,0 +1,7 @@
+- Why do affine transformations map parallel lines to parallel lines?
+- What is a linear combination of points, if the sum of coefficients sum to 2? or -1?
+- What is the formal definition of a point? A vector?
+- How do linear transformations differ from affine transformations?
+- What is point subtraction?
+- What is point blending?
+- Johnny's rendering times are extremely slow. When tracing his ray, he got the following ray intersection coefficients. (3.43439043, -2.3436934839, 0.00003000000, 4.53943). Can you identify the problem?
