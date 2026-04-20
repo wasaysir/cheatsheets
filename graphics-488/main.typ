@@ -1,6 +1,6 @@
 #import "@preview/summy:0.1.0": *
 
-#set text(font: "Helvetica")
+#set text(font: ("Helvetica", "Cabin"), fallback: true)
 
 #show: cheatsheet.with(
   title: "CS488 - Graphics", 
