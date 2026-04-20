@@ -5,3 +5,11 @@
 - What is point subtraction?
 - What is point blending?
 - Johnny's rendering times are extremely slow. When tracing his ray, he got the following ray intersection coefficients. (3.43439043, -2.3436934839, 0.00003000000, 4.53943). Can you identify the problem?
+
+- What is the difference between point and line clipping?
+- What are the two representations of a line?
+  - When do you use each?
+- How do you test if a point is on a line?
+- If $l(Q)$ is +3, is $Q$ inside or out? if $l(Q) = 0$?
+- If $t in [0, 1]$, how does this affect the parametric representation of the line?
+- If points $A$ and $B$ are coincident, how does this affect the parametric representation of the line?
