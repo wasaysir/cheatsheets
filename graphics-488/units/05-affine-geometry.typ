@@ -19,7 +19,7 @@
 
 Affine transformations are a bigger class than linear transformations because they can translate points.
 
-Affine transformations map parallel lines to parallel lines because all $T(P + arrow(v)) = T(P + Q - R) = T(P) + T(Q) - T(R) = T(P) + T(arrow(v))$
+Affine transformations map parallel lines to parallel lines because all $T(P + arrow(v)) = T(P + Q - R) = T(P) + T(Q) - T(R) = T(P) + T(arrow(v))$ but they don't preserve angles or lines. (Ex. Consider square shared)
 
 / Coordinates: A scale-less set of coefficients for a point relative to a frame.
 
@@ -34,7 +34,7 @@ Affine transformations map parallel lines to parallel lines because all $T(P + a
 
 / Composition of Transformations: Process of chaining multiple fundamental transformations to perform complex transformations. *_Order is very important._*
 
-/ Change of Basis: Transformation from one coordinate frame to another. $P_(F_1 arrow F_2) = [[arrow(b_1)]_C,  dots [arrow(b_k)]_C, [O_(F_1) - O_(F_2)]_C]$. To get $[arrow(v)]_W$, in the column, coordinate $i$ is $f_i = arrow(v) dot arrow(w_i)$. If not orthonormal, normalization required. Note original vector (direction + magnitude) is preserved under CoB.
+/ Change of Basis: Transformation from one coordinate frame to another. $P_(F_1 arrow F_2) = [[arrow(b_1)]_C, dots [arrow(b_k)]_C, [O_(F_1) - O_(F_2)]_C]$. To get $[arrow(v)]_W$, in the column, coordinate $i$ is $f_i = arrow(v) dot arrow(w_i)$. If not orthonormal, normalization required. Note original vector (direction + magnitude) is preserved under CoB.
 
 == Ambiguity
 A linear transformation can have many 3 interpretations:
@@ -42,7 +42,7 @@ A linear transformation can have many 3 interpretations:
 + A transformation under same space
 + A map between two spaces
 
-Under change of coordinates, nothing changes about points/vectors, in transformations, some do, in map everything changes. 
+Under change of coordinates, nothing changes about points/vectors, in transformations, some do, in map everything changes.
 
 To specify a transformation we need:
 - Matrix
@@ -50,7 +50,7 @@ To specify a transformation we need:
 - Coordinate frames for each space
 
 == Deriving rotation matrix
-#image("assets/rotation-2d.png")
+#image("../assets/rotation-2d.png")
 
 $x = r times cos(alpha)$
 $y = r times sin(alpha)$
@@ -68,16 +68,37 @@ $y' &= r times(sin(alpha)cos(beta) + cos(alpha)sin(beta)) \
 To rotate around an arbitrary 3D axis, use identity on axis you're not rotating on, row and column. *Note that in RHS, we have cyclic cross product, $X times Y = Z, Y times Z = X, Z times X = Y$ So rotation about Z moves X-axis onto Y-axis, rotation about X moves Y-axis onto Z-axis and rotation about Y moves Z-axis to Y-axis.*
 
 == Viewing frames
-/ World Frame: Standard frame. Normally RHS. 
+/ World Frame: Standard frame. Normally RHS.
 
 / Handedness: Let your thumb point in x-axis, finger-directions toward y-axis, the direction of palm is z-axis.
 
-/ LHS: Left Handed System. x to right, y up, z straight ahead. 
-/ RHS: Right-handed system. y up, z in view direction, x to left. 
+/ LHS: Left Handed System. x to right, y up, z straight ahead.
+/ RHS: Right-handed system. y up, z in view direction, x to left.
 
 == Normals
-Transforming normals can't be done with the same affine transforms on points because normal vectors aren't defined as differences of points. Tangent vectors are defined by differences of points. Normals are perpendicular to all tangents at a point. 
+Transforming normals can't be done with the same affine transforms on points because normal vectors aren't defined as differences of points. Tangent vectors are defined by differences of points. Normals are perpendicular to all tangents at a point.
 
 Let $M$ be a matrix transform. Let $t$ be a tangent and $n$ a normal vector at tangent. Then $arrow(N) dot arrow(T) = n^T t = 0$.
 
 $t' = M t$, we want $n^T t = (n')^T t'$. Let $n' = A n$, $(n')^T t' = (A n)^T M t = n^T A^T M t$. Then let $A^T = M^(-1)$ to get the desired value, which makes $A = M^(-T)$. Thus this is the matrix to transform normals by to deal with affine transforms on points.
+
+== Rotation about an arbitrary axis.
+Given a set of two points $P_1 and P_2$ representing an axis, translate $P_1$ to the origin, then rotate the line onto one of the cardinal axes, then rotate the object around this cardinal axis, then rotate axis to original orientation then translate it to its original position. $R(theta) = T^(-1) R_x^(-1)(alpha) R^(-1)_y (Beta) R_z(theta) R_y(Beta) R_x(alpha) T$
+
+== Building a viewing transformation
+We want a matrix to define the transformation from WCS to VCS. We are given a Lookfrom $(x_0, y_0, z_0)$, and a lookat point. We are also provided an up vector. We want to build our camera.
+
+We need to translate our lookfrom to the WCS origin, then rotate our axes to be aligned with WCS axes, and finally since the VCS is left-handed, but the WCS is RHS so we may need a reflection.
+
+Define $T = mat(
+  1, 0, 0, -x_0;
+  0, 1, 0, -y_0;
+  0, 0, 1, -z_0;
+  0, 0, 0, 1
+)$
+
+Define the following view vectors: $arrow(v_z) = "normalize"("Lookat" - "Lookfrom")$, $v_x = "normalize"(arrow(U p) times arrow(v_z))$. $arrow(v_y) = arrow(v_z) times arrow(v_x)$
+
+The composite matrix $R$ is given by $R = mat(v_(x_1), v_(x_2), v_(x_3), 0; v_(y_1), v_(y_2), v_(y_3), 0; v_(z_1), v_(z_2), v_(z_3), 0; 0, 0, 0, 1)$
+
+Then $V = R T$
