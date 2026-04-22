@@ -1,6 +1,6 @@
 = Colour
 / Trichromatic Theory: Explanation of colour vision at photoreceptor level, based on the three types of cones that exist within the retina.
-/ Opponent-process Theory: Explanation of colour vision based on how they're interconnected neurally.
+/ Opponent-process Theory: Explanation of colour vision based on how they're interconnected neurally. Colours are treated in opposition (red vs green, purple vs yellow, black vs white and suggests cones get tired after being triggered for a specific wavelength, so the brain enhances contrastive elements in the perceived image.
 
 Light reaches our eye as a spectral signal, which is then reduced to three-dimensional colour by our visual system. Try to keep spectral information as long as possible, until it's mapped to display.
 
